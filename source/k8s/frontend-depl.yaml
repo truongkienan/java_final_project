@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: frontend-service:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            # Đây là lúc chúng ta truyền biến môi trường để ghi đè chữ Localhost!
+            - name: BASKET_SERVICE_URL
+              value: "http://basket-clusterip-srv:8083/api/baskets"
+            - name: CATALOG_SERVICE_URL
+              value: "http://catalog-srv:8081/api/products"
+            - name: CATEGORY_SERVICE_URL
+              value: "http://catalog-srv:8081/api/categories"
+            - name: BACKEND_API_GATEWAY_URL
+              value: "http://auth-srv:8085"
+            - name: BASKET_SERVICE_URL
+              value: "http://basket-clusterip-srv:8083/api/baskets"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend
+  ports:
+    - name: frontend-http
+      protocol: TCP
+      port: 8080
+      targetPort: 8888

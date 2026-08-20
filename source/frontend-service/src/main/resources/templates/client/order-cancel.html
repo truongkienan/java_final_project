@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{client/_layout}">
+
+<head>
+    <title>Thanh toán bị hủy - BigStore</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="banner-top">
+        <div class="container">
+            <h3>Order Cancelled</h3>
+            <h4><a th:href="@{/}">Home</a><label>/</label>Order Cancelled</h4>
+            <div class="clearfix"> </div>
+        </div>
+    </div>
+
+    <div class="login">
+        <div class="main-agileits" style="text-align:center; padding:60px 20px;">
+            <i class="fa fa-times-circle" style="font-size:60px; color:#d9534f;"></i>
+            <h3 style="margin-top:20px;" th:text="${message}"></h3>
+            <a th:href="@{/}" class="forg-right" style="display:inline-block; margin-top:20px;">Quay lại trang chủ</a>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{client/_layout}">
+
+<head>
+	<title>Đăng ký BigStore</title>
+</head>
+
+<body>
+	<div layout:fragment="content">
+		<!--banner-->
+		<div class="banner-top">
+			<div class="container">
+				<h3>Register</h3>
+				<h4><a th:href="@{/}">Home</a><label>/</label>Register</h4>
+				<div class="clearfix"> </div>
+			</div>
+		</div>
+		<!--register-->
+		<div class="login">
+			<div class="main-agileits">
+				<div class="form-w3agile form-w3agile1">
+					<h3>Register</h3>
+					<form th:action="@{/register}" th:object="${userDto}" method="post">
+						<!-- Hiển thị lỗi nếu có -->
+						<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+						<div class="key">
+							<i class="fa fa-user" aria-hidden="true"></i>
+							<input type="text" th:field="*{username}" placeholder="Tên đăng nhập" required="">
+							<div class="clearfix"></div>
+						</div>
+						<div class="key">
+							<i class="fa fa-lock" aria-hidden="true"></i>
+							<input type="password" th:field="*{password}" placeholder="Mật khẩu" required="">
+							<div class="clearfix"></div>
+						</div>
+						<input type="submit" value="Register">
+					</form>
+				</div>
+				<div class="forg">
+					<a th:href="@{/login}" class="forg-left">Đã có tài khoản? Đăng nhập ngay</a>
+					<div class="clearfix"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

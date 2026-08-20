@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment
+  template:
+    metadata:
+      labels:
+        app: payment
+    spec:
+      containers:
+        - name: payment
+          image: payment-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080 # Tùy vào port bạn cấu hình trong payment-service
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:sqlserver://mssql-clusterip-srv:1433;databaseName=EcommerceDB;encrypt=true;trustServerCertificate=true;"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "pa55w0rd!"
+            - name: SPRING_RABBITMQ_HOST
+              value: "rabbitmq-clusterip-srv"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: payment
+  ports:
+    - name: payment
+      protocol: TCP
+      port: 8080
+      targetPort: 8080

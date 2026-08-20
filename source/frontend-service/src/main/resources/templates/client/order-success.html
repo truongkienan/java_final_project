@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{client/_layout}">
+
+<head>
+    <title>Đặt hàng thành công - BigStore</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="banner-top">
+        <div class="container">
+            <h3>Order Success</h3>
+            <h4><a th:href="@{/}">Home</a><label>/</label>Order Success</h4>
+            <div class="clearfix"> </div>
+        </div>
+    </div>
+
+    <div class="login">
+        <div class="main-agileits" style="text-align:center; padding:60px 20px;">
+            <i class="fa fa-check-circle" style="font-size:60px; color:green;"></i>
+            <h3 style="margin-top:20px;" th:text="${message}"></h3>
+            <a th:href="@{/}" class="forg-right" style="display:inline-block; margin-top:20px;">Tiếp tục mua sắm</a>
+        </div>
+    </div>
+</div>
+<script>
+    // Chỉ xóa giỏ hàng phía client (localStorage) tại đây - trang này chỉ render sau khi
+    // CheckoutController.paymentSuccess() đã xác nhận PayPal capture COMPLETED thật sự.
+    $(function () {
+        localStorage.products = "[]";
+        $(".my-cart-badge").text("0");
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth
+          image: auth-service:latest
+          # Luôn kéo image mới nhất về đề phòng bạn có cập nhật code
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8085
+          env:
+            # Ghi đè URL kết nối Database thành tên nội bộ của K8s
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:sqlserver://mssql-clusterip-srv:1433;databaseName=EcommerceDB;encrypt=true;trustServerCertificate=true;"
+            # Ghi đè mật khẩu (nếu cần)
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "pa55w0rd!"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: auth
+  ports:
+    - name: auth
+      protocol: TCP
+      port: 8085
+      targetPort: 8085

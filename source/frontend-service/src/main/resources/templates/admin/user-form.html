@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/_layout}">
+
+<head>
+    <title>Thêm tài khoản - Admin</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <h1 class="mt-4">Thêm tài khoản mới</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a th:href="@{/admin/users}">Danh sách tài khoản</a></li>
+            <li class="breadcrumb-item active">Thêm mới</li>
+        </ol>
+
+        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+        <div class="card mb-4" style="max-width: 500px;">
+            <div class="card-body">
+                <form th:action="@{/admin/users/create}" th:object="${newUser}" method="post">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" class="form-control" th:field="*{username}" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Mật khẩu</label>
+                        <input type="password" class="form-control" th:field="*{password}" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select class="form-control" th:field="*{role}">
+                            <option th:each="r : ${allRoles}" th:value="${r.roleName}" th:text="${r.roleName}"></option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">Tạo tài khoản</button>
+                    <a th:href="@{/admin/users}" class="btn btn-secondary">Hủy bỏ</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

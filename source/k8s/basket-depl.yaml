@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: basket-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: basket
+  template:
+    metadata:
+      labels:
+        app: basket
+    spec:
+      containers:
+        - name: basket
+          image: basket-service:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            # Ghi đè Redis Host thành tên nội bộ của K8s
+            - name: SPRING_DATA_REDIS_HOST
+              value: "redis-clusterip-srv"
+            # Ghi đè RabbitMQ Host thành tên nội bộ của K8s
+            - name: SPRING_RABBITMQ_HOST
+              value: "rabbitmq-clusterip-srv"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: basket-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: basket
+  ports:
+    - name: basket
+      protocol: TCP
+      port: 8083
+      targetPort: 8083

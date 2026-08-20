@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/_layout}">
+
+<head>
+    <title>Trang chủ Admin</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <h1 class="mt-4">Dashboard</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item active">Dashboard</li>
+        </ol>
+
+        <!-- Truyền dữ liệu doanh thu 6 tháng gần nhất sang chart-area-demo.js qua biến global -
+             script này chạy TRƯỚC các thẻ <script> ở cuối _layout.html vì nằm sớm hơn trong DOM,
+             nên biến chắc chắn có sẵn khi cần. -->
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            window.__revenueChartData = {
+                labels: /*[[${revenueMonthLabels}]]*/ [],
+                data: /*[[${revenueMonthData}]]*/ []
+            };
+            /*]]>*/
+        </script>
+        <!-- th:inline="none" để tắt hẳn cơ chế xử lý cú pháp [[...]] mặc định của Thymeleaf -
+             nếu không có dòng này, Thymeleaf vẫn cố parse mảng JS lồng nhau bên dưới như biểu
+             thức của chính nó, gây lỗi ngay cả khi thẻ script không khai báo th:inline="javascript". -->
+        <script th:inline="none">
+            window.__dataTableOrder = [[2, 'desc']];
+        </script>
+
+        <div class="row">
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-primary text-white mb-4">
+                    <div class="card-body">Primary Card</div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white stretched-link" href="#">View Details</a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-warning text-white mb-4">
+                    <div class="card-body">Warning Card</div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white stretched-link" href="#">View Details</a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-success text-white mb-4">
+                    <div class="card-body">Success Card</div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white stretched-link" href="#">View Details</a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-danger text-white mb-4">
+                    <div class="card-body">Danger Card</div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white stretched-link" href="#">View Details</a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xl-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-chart-area mr-1"></i>
+                        Doanh thu 6 tháng gần nhất
+                    </div>
+                    <div class="card-body"><canvas id="myAreaChart" width="100%" height="40"></canvas></div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-chart-bar mr-1"></i>
+                        Bar Chart Example
+                    </div>
+                    <div class="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas></div>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table mr-1"></i>
+                Đơn hàng gần đây
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>Mã đơn hàng</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th>Mã đơn hàng</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        <tr th:each="order : ${recentOrders}">
+                            <td th:text="${#strings.substring(order.id, 0, 8)}"></td>
+                            <td th:text="${order.memberId}"></td>
+                            <td th:text="${#strings.substring(order.orderDate, 0, 10)}"></td>
+                            <td th:text="${order.totalAmount}"></td>
+                            <td>
+                                <span th:if="${order.status == 'PAID'}" class="badge badge-success" th:text="${order.status}">PAID</span>
+                                <span th:if="${order.status == 'PENDING'}" class="badge badge-warning" th:text="${order.status}">PENDING</span>
+                                <span th:if="${order.status == 'PENDING_INVENTORY'}" class="badge badge-warning" th:text="${order.status}">PENDING_INVENTORY</span>
+                                <span th:if="${order.status == 'CANCELLED'}" class="badge badge-danger" th:text="${order.status}">CANCELLED</span>
+                                <span th:if="${order.status == 'FAILED'}" class="badge badge-dark" th:text="${order.status}">FAILED</span>
+                                <span th:if="${order.status == 'OUT_OF_STOCK'}" class="badge badge-dark" th:text="${order.status}">OUT_OF_STOCK</span>
+                                <span th:if="${order.status == 'REFUND_REQUESTED'}" class="badge badge-info" th:text="${order.status}">REFUND_REQUESTED</span>
+                                <span th:if="${order.status == 'REFUNDED'}" class="badge badge-secondary" th:text="${order.status}">REFUNDED</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/_layout}">
+
+<head>
+    <title>Quản lý Danh mục - Admin</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <h1 class="mt-4">Danh mục</h1>
+        <a th:href="@{/admin/categories/new}" class="btn btn-primary mb-3">Thêm danh mục mới</a>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a th:href="@{/admin}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Danh mục</li>
+        </ol>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table mr-1"></i> Danh sách Danh mục
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên danh mục</th>
+                            <th>Danh mục cha</th>
+                            <th>Hình ảnh</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="cat : ${categories}">
+                            <td th:text="${cat.categoryId}">1</td>
+                            <td>
+                                        <span th:style="${cat.parentId == null} ? 'font-weight:bold;' : 'padding-left:25px;'"
+                                              th:text="${cat.parentId != null ? '↳ ' : ''} + ${cat.categoryName}">Tên Category</span>
+                            </td>
+                            <td th:text="${cat.parentName != null ? cat.parentName : '— (Cấp 1)'}">—</td>
+                            <td>
+                                <img th:if="${cat.imageUrl != null}" th:src="${cat.imageUrl}"
+                                     style="width: 50px; height: 50px; object-fit: cover;" />
+                            </td>
+                            <td>
+                                <span th:if="${cat.active}" class="badge badge-success">Active</span>
+                                <span th:unless="${cat.active}" class="badge badge-secondary">Ẩn</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/admin/categories/edit/{id}(id=${cat.categoryId})}"
+                                   class="btn btn-sm btn-primary">Edit</a>
+                                <form th:action="@{/admin/categories/delete/{id}(id=${cat.categoryId})}"
+                                      method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Bạn có chắc chắn muốn xóa Danh mục này?')">Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

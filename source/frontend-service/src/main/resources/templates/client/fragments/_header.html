@@ -1,0 +1,106 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="header">
+    <div class="header">
+
+        <div class="container">
+
+            <div class="logo">
+                <h1><a th:href="@{/}"><b>T<br>H<br>E</b>Big Store<span>The Best Supermarket</span></a></h1>
+            </div>
+            <div class="head-t">
+                <ul class="card">
+                    <li><a href="wishlist.html"><i class="fa fa-heart" aria-hidden="true"></i>Wishlist</a></li>
+                    <!-- Nếu chưa đăng nhập -->
+                    <th:block th:if="${session.username == null}">
+                        <li><a th:href="@{/login}"><i class="fa fa-user" aria-hidden="true"></i>Login</a></li>
+                        <li><a th:href="@{/register}"><i class="fa fa-arrow-right" aria-hidden="true"></i>Register</a>
+                        </li>
+                    </th:block>
+
+                    <!-- Nếu đã đăng nhập -->
+                    <th:block th:if="${session.username != null}">
+                        <li><a href="#"><i class="fa fa-user" aria-hidden="true"></i><span
+                                th:text="'Xin chào, ' + ${session.username}"></span></a></li>
+                        <li><a th:href="@{/logout}"><i class="fa fa-sign-out" aria-hidden="true"></i>Logout</a></li>
+                    </th:block>
+
+                    <li><a th:href="@{/account}"><i class="fa fa-file-text-o" aria-hidden="true"></i>Order History</a></li>
+                    <li><a href="shipping.html"><i class="fa fa-ship" aria-hidden="true"></i>Shipping</a></li>
+                </ul>
+            </div>
+
+            <div class="header-ri">
+                <ul class="social-top">
+                    <li><a href="#" class="icon facebook"><i class="fa fa-facebook"
+                                                             aria-hidden="true"></i><span></span></a></li>
+                    <li><a href="#" class="icon twitter"><i class="fa fa-twitter"
+                                                            aria-hidden="true"></i><span></span></a></li>
+                    <li><a href="#" class="icon pinterest"><i class="fa fa-pinterest-p"
+                                                              aria-hidden="true"></i><span></span></a></li>
+                    <li><a href="#" class="icon dribbble"><i class="fa fa-dribbble"
+                                                             aria-hidden="true"></i><span></span></a></li>
+                </ul>
+            </div>
+
+
+            <div class="nav-top">
+                <nav class="navbar navbar-default">
+
+                    <div class="navbar-header nav_2">
+                        <button type="button" class="navbar-toggle collapsed navbar-toggle1" data-toggle="collapse"
+                                data-target="#bs-megadropdown-tabs">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+
+
+                    </div>
+                    <div class="collapse navbar-collapse" id="bs-megadropdown-tabs">
+                        <ul class="nav navbar-nav ">
+                            <li class=" active"><a th:href="@{/}" class="hyper "><span>Home</span></a></li>
+
+                            <!-- Danh mục cấp 1 + cấp 2 nạp động từ DB qua categoryTree (ClientGlobalAdvice) -->
+                            <li class="dropdown" th:each="root : ${categoryTree}">
+                                <a href="#" class="dropdown-toggle hyper" data-toggle="dropdown"><span
+                                        th:text="${root.categoryName}">Root</span><b class="caret"></b></a>
+                                <ul class="dropdown-menu multi">
+                                    <div class="row">
+                                        <div class="col-sm-9">
+                                            <ul class="multi-column-dropdown"
+                                                style="column-count:3;-webkit-column-count:3;-moz-column-count:3;">
+                                                <li th:each="child : ${root.children}">
+                                                    <a th:href="@{/}"><i class="fa fa-angle-right"
+                                                                         aria-hidden="true"></i><span
+                                                            th:text="${child.categoryName}">Child</span></a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-sm-3 w3l" th:if="${root.imageUrl != null and !root.imageUrl.isEmpty()}">
+                                            <a th:href="@{/}"><img th:src="${root.imageUrl}"
+                                                                   class="img-responsive" alt=""></a>
+                                        </div>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                </ul>
+                            </li>
+
+                            <li><a href="codes.html" class="hyper"> <span>Codes</span></a></li>
+                            <li><a href="contact.html" class="hyper"><span>Contact Us</span></a></li>
+                        </ul>
+                    </div>
+                </nav>
+                <div class="cart">
+
+                    <span class="fa fa-shopping-cart my-cart-icon"><span
+                            class="badge badge-notify my-cart-badge"></span></span>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</html>

@@ -1,0 +1,13 @@
+server:
+  port: 8888
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: frontend-service
+  thymeleaf:
+    cache: false # Tắt cache để dev dễ dàng cập nhật giao diện

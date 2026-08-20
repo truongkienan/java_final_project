@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{client/_layout}">
+
+<head>
+    <title>Tài khoản của tôi - BigStore</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <!--banner-->
+    <div class="banner-top">
+        <div class="container">
+            <h3>Tài khoản của tôi</h3>
+            <h4><a th:href="@{/}">Home</a><label>/</label>Tài khoản</h4>
+            <div class="clearfix"> </div>
+        </div>
+    </div>
+
+    <div class="login">
+        <div class="main-agileits" style="width:90%; max-width:1100px;">
+            <div class="form-w3agile form-w3agile1">
+                <h3>Xin chào, <span th:text="${username}"></span></h3>
+
+                <h4 style="margin-top:30px;">Lịch sử đơn hàng</h4>
+
+                <div th:if="${orderMessage}" class="alert alert-success" style="color: green;" th:text="${orderMessage}"></div>
+                <div th:if="${orderError}" class="alert alert-danger" th:text="${orderError}"></div>
+
+                <div th:if="${orders.isEmpty()}">
+                    <p>Bạn chưa có đơn hàng nào.</p>
+                </div>
+
+                <table th:unless="${orders.isEmpty()}" class="table" style="width:100%; color:#333; margin-top:15px;">
+                    <thead>
+                    <tr>
+                        <th>Mã đơn hàng</th>
+                        <th>Ngày đặt</th>
+                        <th>Số sản phẩm</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td th:text="${#strings.substring(order.id, 0, 8)}"></td>
+                        <td th:text="${#strings.substring(order.orderDate, 0, 10)}"></td>
+                        <td th:text="${order.details.size()}"></td>
+                        <td th:text="${order.totalAmount}"></td>
+                        <td th:text="${order.status}"></td>
+                        <td>
+                            <form th:if="${order.status == 'PENDING'}" th:action="@{/account/orders/{id}/cancel(id=${order.id})}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Hủy đơn hàng này?')">Hủy đơn hàng</button>
+                            </form>
+                            <form th:if="${order.status == 'PAID'}" th:action="@{/account/orders/{id}/request-refund(id=${order.id})}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Gửi yêu cầu hoàn tiền cho đơn này?')">Yêu cầu hoàn tiền</button>
+                            </form>
+                            <span th:if="${order.status == 'REFUND_REQUESTED'}" style="font-style:italic; color:#888;">Đang chờ duyệt hoàn tiền</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <h4 style="margin-top:30px;">Sổ địa chỉ giao hàng</h4>
+
+                <div th:if="${addresses.isEmpty()}">
+                    <p>Bạn chưa lưu địa chỉ nào.</p>
+                </div>
+
+                <table th:unless="${addresses.isEmpty()}" class="table" style="width:100%; color:#333; margin-top:15px;">
+                    <thead>
+                    <tr>
+                        <th>Địa chỉ</th>
+                        <th>Số điện thoại</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="addr : ${addresses}">
+                        <td th:text="${addr.addressName}"></td>
+                        <td th:text="${addr.phone}"></td>
+                        <td>
+                            <form th:action="@{/account/addresses/delete/{id}(id=${addr.addressId})}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Xóa địa chỉ này?')">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <form th:action="@{/account/addresses/add}" method="post" style="max-width:400px; margin-top:15px;">
+                    <div class="key">
+                        <i class="fa fa-map-marker" aria-hidden="true"></i>
+                        <input type="text" name="addressName" placeholder="Địa chỉ chi tiết" required="">
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="key">
+                        <i class="fa fa-phone" aria-hidden="true"></i>
+                        <input type="text" name="phone" placeholder="Số điện thoại" required="">
+                        <div class="clearfix"></div>
+                    </div>
+                    <input type="submit" value="Thêm địa chỉ">
+                </form>
+
+                <h4 style="margin-top:30px;">Đổi mật khẩu</h4>
+
+                <div th:if="${passwordMessage}" class="alert alert-success" style="color: green;" th:text="${passwordMessage}"></div>
+                <div th:if="${passwordError}" class="alert alert-danger" th:text="${passwordError}"></div>
+
+                <form th:action="@{/account/change-password}" method="post" style="max-width:400px; margin-top:15px;">
+                    <div class="key">
+                        <i class="fa fa-lock" aria-hidden="true"></i>
+                        <input type="password" name="oldPassword" placeholder="Mật khẩu hiện tại" required="">
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="key">
+                        <i class="fa fa-lock" aria-hidden="true"></i>
+                        <input type="password" name="newPassword" placeholder="Mật khẩu mới" required="">
+                        <div class="clearfix"></div>
+                    </div>
+                    <input type="submit" value="Đổi mật khẩu">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

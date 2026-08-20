@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.ecommerce.catalog.grpc";
+
+// Định nghĩa dịch vụ CatalogGrpc
+service CatalogGrpcService {
+  // Hàm kiểm tra giá sản phẩm
+  rpc CheckProductPrice (ProductRequest) returns (ProductResponse);
+}
+
+// Định nghĩa dữ liệu đầu vào (Client gửi ID sản phẩm)
+message ProductRequest {
+  string productId = 1;
+}
+
+// Định nghĩa dữ liệu đầu ra (Server trả về giá)
+message ProductResponse {
+  string productId = 1;
+  double price = 2;
+  bool exists = 3;
+}

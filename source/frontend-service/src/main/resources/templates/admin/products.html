@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/_layout}">
+
+<head>
+    <title>Quản lý Sản phẩm - Admin</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- CHỈ GIỮ LẠI ĐÚNG KHỐI CONTAINER CỦA SẢN PHẨM Ở ĐÂY -->
+        <div class="container-fluid">
+            <h1 class="mt-4">Sản phẩm</h1>
+            <a th:href="@{/admin/products/new}" class="btn btn-primary mb-3">Thêm sản phẩm mới</a>
+            <ol class="breadcrumb mb-4">
+                <li class="breadcrumb-item"><a th:href="@{/admin}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Sản phẩm</li>
+            </ol>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-table mr-1"></i> Danh sách Sản phẩm
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Giá bán</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="product : ${products}">
+                                    <td th:text="${product.productId}">1</td>
+                                    <td th:text="${product.productName}">Tên sản phẩm</td>
+                                    <td>
+                                        <img th:if="${product.imageUrl != null}"
+                                            th:src="@{/client/images/{img}(img=${product.imageUrl})}"
+                                            style="width: 50px; height: 50px; object-fit: cover;" />
+                                    </td>
+                                    <td th:text="${product.unitPrice}">100,000</td>
+                                    <td>
+                                        <a th:href="@{/admin/products/edit/{id}(id=${product.productId})}"
+                                            class="btn btn-sm btn-primary">Edit</a>
+                                        <form th:action="@{/admin/products/delete/{id}(id=${product.productId})}"
+                                            method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Bạn có chắc chắn muốn xóa Sản phẩm này?')">Xóa</button>
+                                        </form>
+
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

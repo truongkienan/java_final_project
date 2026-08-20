@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{client/_layout}">
+
+<head>
+	<title th:text="${product.productName} + ' - BigStore'">Chi tiết sản phẩm - BigStore</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+	<!--banner-->
+	<div class="banner-top">
+		<div class="container">
+			<h3 th:text="${product.productName}">Tên sản phẩm</h3>
+			<h4><a th:href="@{/}">Home</a><label>/</label><span th:text="${product.productName}"></span></h4>
+			<div class="clearfix"> </div>
+		</div>
+	</div>
+
+	<div class="single">
+		<div class="container">
+			<div class="single-top-main">
+				<div class="col-md-5 single-top">
+					<div class="single-w3agile">
+						<div id="picture-frame">
+							<img th:src="@{/client/images/{img}(img=${product.imageUrl})}" alt=""
+							     class="img-responsive" />
+						</div>
+					</div>
+				</div>
+				<div class="col-md-7 single-top-left ">
+					<div class="single-right">
+						<h3 th:text="${product.productName}">Tên sản phẩm</h3>
+
+						<div class="pr-single">
+							<p class="reduced">$<span th:text="${product.unitPrice}"></span></p>
+						</div>
+						<div class="block block-w3">
+							<div class="starbox small ghosting"> </div>
+						</div>
+						<p class="in-pa" th:text="${product.description}"></p>
+
+						<div class="add add-3">
+							<button class="btn btn-danger my-cart-btn my-cart-b" data-quantity="1"
+							        th:attr="data-id=${product.productId}, data-name=${product.productName}, data-price=${product.unitPrice}, data-image=@{/client/images/{img}(img=${product.imageUrl})}">
+								Add to Cart
+							</button>
+						</div>
+						<div class="clearfix"> </div>
+					</div>
+				</div>
+				<div class="clearfix"> </div>
+			</div>
+		</div>
+	</div>
+
+	<!---->
+	<div class="content-top offer-w3agile">
+		<div class="container ">
+			<div class="spec ">
+				<h3>Sản phẩm khác</h3>
+				<div class="ser-t">
+					<b></b>
+					<span><i></i></span>
+					<b class="line"></b>
+				</div>
+			</div>
+			<div class=" con-w3l wthree-of">
+				<div class="col-md-3 pro-1" th:each="p : ${relatedProducts}">
+					<div class="col-m">
+						<a th:href="@{/product/{id}(id=${p.productId})}" class="offer-img">
+							<img th:src="@{/client/images/{img}(img=${p.imageUrl})}" class="img-responsive"
+							     alt="">
+						</a>
+						<div class="mid-1">
+							<div class="women">
+								<h6><a th:href="@{/product/{id}(id=${p.productId})}"
+								       th:text="${p.productName}">Product</a></h6>
+							</div>
+							<div class="mid-2">
+								<p><em class="item_price" th:text="${p.unitPrice}"></em></p>
+								<div class="block">
+									<div class="starbox small ghosting"> </div>
+								</div>
+								<div class="clearfix"></div>
+							</div>
+							<div class="add">
+								<button class="btn btn-danger my-cart-btn my-cart-b" data-quantity="1"
+								        th:attr="data-id=${p.productId}, data-name=${p.productName}, data-price=${p.unitPrice}, data-image=@{/client/images/{img}(img=${p.imageUrl})}">
+									Add to Cart
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="clearfix"></div>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+
+</html>

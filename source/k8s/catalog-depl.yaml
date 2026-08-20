@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalog
+  template:
+    metadata:
+      labels:
+        app: catalog
+    spec:
+      containers:
+        - name: catalog
+          image: catalog-service:latest
+          imagePullPolicy: IfNotPresent # Báo K8s dùng image local
+          # Bắt đầu thêm phần env:
+          env:
+            # Ghi đè URL kết nối Database thành tên nội bộ của K8s
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:sqlserver://mssql-clusterip-srv:1433;databaseName=EcommerceDB;encrypt=true;trustServerCertificate=true;"
+            # Ghi đè mật khẩu (nếu cần)
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "pa55w0rd!"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalog-srv
+spec:
+  selector:
+    app: catalog
+  ports:
+    - name: catalog-http
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
+    - name: catalog-grpc
+      protocol: TCP
+      port: 9090
+      targetPort: 9090

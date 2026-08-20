@@ -1,0 +1,26 @@
+# Build output (Maven)
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Claude Code local settings (không phải code dự án)
+.claude/
+
+# Log files
+*.log
+
+# 2 git repo độc lập không liên quan, nằm lẫn trong thư mục này
+/WebAPI401/
+/WebApp401/
+
+# Theme HTML gốc chỉ dùng để tham khảo dựng giao diện - không phải code tự viết
+/client_web_app_template/
+/dashboard_template/
+
+# OS junk
+.DS_Store
+Thumbs.db
