@@ -15,7 +15,16 @@ spec:
       containers:
         - name: customer
           image: customer-service:latest
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:sqlserver://mssql-clusterip-srv:1433;databaseName=EcommerceDB;encrypt=true;trustServerCertificate=true;"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "sa"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "pa55w0rd!"
 ---
 apiVersion: v1
 kind: Service

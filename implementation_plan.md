@@ -890,3 +890,61 @@ Nếu chỉ sửa tên exchange, message SẼ tới được `basket_queue`, nh�
 
 Test cuối: verify qua browser thật (đăng nhập `admin`) — biểu đồ đúng `label:"Doanh thu"`, dữ liệu 6 tháng khớp DB (176.351.000đ ở tháng hiện tại, 5 tháng trước = 0); bảng "Đơn hàng gần đây" sort đúng theo Ngày đặt giảm dần, badge trạng thái hiển thị đúng cho mọi status (PAID/PENDING/CANCELLED/FAILED/PENDING_INVENTORY/OUT_OF_STOCK/REFUND_REQUESTED/REFUNDED).
 
+## Triển khai lên Kubernetes — Kế hoạch mới (21/08/2026)
+
+**Yêu cầu người dùng:** lập kế hoạch triển khai lên môi trường k8s, bám sát các service/manifest đã có sẵn (`source/k8s/*.yaml`) để đi đúng hướng, không tự đặt ra convention mới.
+
+### Khảo sát hiện trạng (trước khi lập kế hoạch)
+
+Đọc toàn bộ 10 file trong `source/k8s/` + 7 `Dockerfile` hiện có + toàn bộ `@Value(".. _URL:...")` trong `frontend-service`/`auth-service` để đối chiếu. Convention hiện tại:
+- Mỗi service: 1 `Deployment` (image `<ten>-service:latest`, `imagePullPolicy: IfNotPresent`, build local bằng `docker build`, **không dùng registry, không có script build tự động** — thao tác thủ công) + 1 `Service` (đa số đặt tên `<ten>-clusterip-srv`, một số ít `<ten>-srv`).
+- Ghi đè cấu hình qua biến môi trường trực tiếp trong `Deployment` (không dùng ConfigMap/Secret) — DB dùng chung `mssql-clusterip-srv`/database `EcommerceDB`/password `pa55w0rd!` (khác password `123456` dùng khi chạy local, đây là 2 giá trị tách biệt có chủ đích).
+- `Dockerfile`: `FROM eclipse-temurin:21-jre-alpine`, copy thẳng `target/*.jar` đã build sẵn (không multi-stage build trong Docker) — nghĩa là phải `mvn package` trước, `docker build` sau.
+- `Ingress` (`ingress-srv.yaml`): expose trực tiếp từng `/api/...` prefix ra ngoài (không qua API Gateway tập trung), cộng `/` cho `frontend-srv`.
+
+**Phát hiện các lỗ hổng (không chỉ thiếu `inventory-service`):**
+1. `inventory-service` (thêm ở Phase Saga Tồn kho, sau khi các file k8s này được tạo) **hoàn toàn chưa có** trong hạ tầng k8s — không `Dockerfile`, không `Deployment`/`Service`, không route `Ingress`.
+2. `auth-depl.yaml` **thiếu biến `CUSTOMER_SERVICE_URL`** — `AuthController.java` (auth-service) gọi sang customer-service để xác thực khách hàng (từ Phase "Tách 2 loại tài khoản"), nếu thiếu biến này sẽ fallback về `http://localhost:8082/...` bên trong container → lỗi kết nối, đăng nhập khách hàng gãy hoàn toàn trên k8s dù chạy local vẫn bình thường.
+3. `frontend-depl.yaml` **chỉ có 4/12 biến `_SERVICE_URL` cần thiết** (thiếu `PAYMENT_SERVICE_URL`, `CUSTOMER_SERVICE_URL`, `ADDRESS_SERVICE_URL`, `INVENTORY_SERVICE_URL`, `USER_SERVICE_URL`, `ROLE_SERVICE_URL`, `PERMISSION_SERVICE_URL`, `ORDER_SERVICE_URL`) — các file k8s này được tạo từ giai đoạn đầu dự án, trước khi các tính năng Đơn hàng/Thanh toán/Sổ địa chỉ/Tồn kho/Role-Permission-Users được xây dựng, nên chưa được cập nhật theo. Nếu deploy nguyên trạng, gần như toàn bộ tính năng nghiệp vụ chính sẽ lỗi kết nối trên k8s.
+4. `ingress-srv.yaml` thiếu route `/api/stocks` (inventory-service) — không bắt buộc về mặt chức năng (frontend-service gọi nội bộ qua `ClusterIP`, không qua `Ingress`) nhưng nên thêm để nhất quán với các API khác đã expose, tiện test trực tiếp qua Postman/curl từ ngoài cluster.
+
+### Task list
+
+- `[x]` **Bước 1 — Tạo `source/inventory-service/Dockerfile`:** theo đúng mẫu tối giản của `catalog-service`/`payment-service` (`eclipse-temurin:21-jre-alpine`, copy `target/*.jar`).
+- `[x]` **Bước 2 — Tạo `source/k8s/inventory-depl.yaml`:** theo đúng mẫu `basket-depl.yaml` (có `SPRING_DATASOURCE_URL`/`SPRING_DATASOURCE_PASSWORD` trỏ `mssql-clusterip-srv`, `SPRING_RABBITMQ_HOST` trỏ `rabbitmq-clusterip-srv`, không có gRPC vì inventory-service không dùng); `Service` tên `inventory-clusterip-srv`, port `8086` (khớp cùng nhóm backend nội bộ như order/payment/basket).
+- `[x]` **Bước 3 — Vá `source/k8s/auth-depl.yaml`:** thêm `CUSTOMER_SERVICE_URL` trỏ `http://customer-srv:8082/api/members`.
+- `[x]` **Bước 4 — Vá `source/k8s/frontend-depl.yaml`:** bổ sung đủ 8 biến còn thiếu, trỏ đúng tên `Service` nội bộ tương ứng (`order-clusterip-srv`, `payment-clusterip-srv`, `customer-srv`, `inventory-clusterip-srv`, `auth-srv`). Tiện tay dọn luôn `BASKET_SERVICE_URL` đang bị khai báo lặp 2 lần trong file gốc.
+- `[x]` **Bước 5 — Vá `source/k8s/ingress-srv.yaml`:** thêm route `/api/stocks` → `inventory-clusterip-srv:8086`.
+- `[x]` **Bước 6 — Build + deploy + test trên cluster thật:** môi trường xác định là **Docker Desktop Kubernetes** (context `docker-desktop`, 1 node, cluster đã có sẵn từ trước với 7 deployment cũ). Build lại toàn bộ 8 image (`docker build -t <ten>-service:latest .`) → `kubectl apply -f source/k8s/` → `kubectl rollout restart` toàn bộ 7 deployment cũ để buộc nạp image mới (`imagePullPolicy: IfNotPresent` + tag `:latest` không tự nạp lại image mới nếu không restart thủ công).
+  - **Sự cố phát sinh 1 — DB trong k8s (`mssql-depl`, PVC riêng) là một instance hoàn toàn tách biệt, cũ ~14 ngày** so với SQL Server local dùng để phát triển suốt phiên làm việc: thiếu cột (`active`/`position`/`slug` trên `categories`) và chỉ có dữ liệu demo gốc (10 category/10 product/2 user, 0 dòng ở roles/permissions/members/stocks/invoices) — gây lỗi `500` (`Invalid column name 'active'`) khi test qua `Ingress`. Người dùng chọn hướng xử lý triệt để: xoá sạch + đồng bộ lại toàn bộ dữ liệu giống hệt local.
+  - Thử `BACKUP`/`RESTORE` trước — bỏ do bế tắc quyền NTFS (user thường không đọc được thư mục Backup mặc định của SQL Server, và ngược lại service SQL Server không ghi được vào thư mục user, không có quyền admin để cấp `icacls`).
+  - Chuyển hướng: viết script T-SQL sinh câu lệnh `INSERT INTO ...` trực tiếp từ dữ liệu local (12 bảng, xử lý `NULL`/escape string/`N'...'`/datetime/`uniqueidentifier` đúng kiểu cột) → chạy trên local, thu được 199 dòng `INSERT` chính xác → xoá sạch toàn bộ bảng trên DB k8s (drop hết FK rồi hết table qua script động, không cần biết thứ tự phụ thuộc) → `kubectl rollout restart` 6 service có JPA để Hibernate (`ddl-auto=update`) tự tạo lại schema mới từ entity hiện tại.
+  - **Sự cố phát sinh 2 — `order-depl.yaml` thiếu hẳn `SPRING_DATASOURCE_USERNAME`/`PASSWORD`, `customer-depl.yaml` thiếu toàn bộ biến môi trường lẫn `containerPort`** (2 manifest gốc chưa từng được hoàn thiện, sót lại từ đợt vá Bước 3-4 vì lúc đó chỉ audit `auth-depl.yaml`/`frontend-depl.yaml`) — cả 2 service rơi về `spring.datasource.password=123456` (mặc định trong `application.properties`, dùng cho local) trong khi SA password trên k8s là `pa55w0rd!` → lỗi `Login failed for user 'sa'`, pod `CrashLoopBackOff`. Vá cả 2 file (thêm `SPRING_DATASOURCE_USERNAME=sa`/`PASSWORD=pa55w0rd!`, và với `customer-depl.yaml` thêm cả `containerPort: 8082` + `SPRING_DATASOURCE_URL`) theo đúng convention các service khác, `kubectl apply` + `rollout restart` lại — cả 2 khởi động thành công.
+  - Chạy 199 dòng `INSERT` (bọc `SET IDENTITY_INSERT <table> ON/OFF` cho 6 bảng có cột IDENTITY: `categories`/`products`/`roles`/`permissions`/`users`/`addresses`, theo đúng thứ tự phụ thuộc FK) vào DB k8s. Phát hiện 1 dòng `category_id=1` bị thiếu do file export có ký tự BOM (UTF-8) ở đầu dòng đầu tiên khiến script tự động chèn `SET IDENTITY_INSERT` bị lệch vị trí cho riêng bảng đầu tiên — chèn bù thủ công 1 dòng đó, verify lại: đủ 12/12 bảng, tổng 199 dòng khớp chính xác dữ liệu local.
+  - Verify cuối: `kubectl get pods` toàn bộ `Running` (0 restart mới), test qua `curl` tới `Ingress` (`http://ecommerce.local/`) — `/api/categories`, `/api/categories/tree` (xác nhận category id=1 "Kitchen" trả về đúng), `/api/products`, `/api/members`, `/api/stocks`, trang chủ frontend — toàn bộ `HTTP 200`.
+  - **Giới hạn đã biết:** không có `readinessProbe` trong manifest nào — k8s route traffic tới pod ngay khi container start, chưa chờ app thực sự sẵn sàng (từng gây "Connection refused" thoáng qua khi 7 JVM khởi động đồng loạt, có JVM mất tới 125s do tranh chấp CPU) — chưa fix, ghi nhận là cải tiến tiềm năng sau này. Kiểm tra UI qua trình duyệt tự động bị chặn bởi lớp phê duyệt an toàn cho domain lạ (`ecommerce.local`) — chưa test được qua giao diện thật, chỉ verify qua API trực tiếp; người dùng nên tự mở trình duyệt kiểm tra thêm luồng đăng nhập/đặt hàng/Saga tồn kho.
+
+**Lưu ý phạm vi:** giữ nguyên convention "biến môi trường thô trong Deployment YAML" đã dùng xuyên suốt (không đổi sang Secret/ConfigMap dù đó là thực hành tốt hơn cho secret thật) — vì mục tiêu là bám sát hướng đi đã có, không tái thiết kế. Có thể đề xuất tách secret ra `Secret` riêng như 1 cải tiến sau này nếu người dùng muốn.
+
+Sẽ làm tuần tự từng bước, mỗi bước dán code → review → sang bước tiếp, giữ đúng quy trình đã áp dụng xuyên suốt dự án.
+
+### Sự cố phát sinh sau Bước 6 — phát hiện qua test thật trên trình duyệt của người dùng
+
+Người dùng tự test checkout trên trình duyệt thật (Chrome), gặp alert **"Có lỗi xảy ra khi đồng bộ giỏ hàng!"**. Log `frontend-depl` cho thấy `ResourceAccessException: Connection refused` khi `BasketApiService.updateBasket()` gọi tới `http://localhost:8083/api/baskets` — chính là giá trị fallback mặc định trong code (`@Value("${BASKET_SERVICE_URL:http://localhost:8083/api/baskets}")`), nghĩa là pod đang chạy không có biến `BASKET_SERVICE_URL`.
+
+**Nguyên nhân gốc:** đối chiếu file `frontend-depl.yaml` trên đĩa (đã có đủ 12 biến, đúng từ Bước 4) với biến môi trường THỰC TẾ trong pod (`kubectl exec ... env`) thì pod đang chạy thiếu hẳn `BASKET_SERVICE_URL` — pod đó (tồn tại từ trước, thuộc nhóm 7 deployment cũ) chưa từng được `kubectl apply` lại với bản vá kể từ Bước 4/Bước 6, dù `rollout restart` đã chạy cho 6 service JPA lúc xử lý sự cố DB, **frontend-depl không nằm trong nhóm đó nên không được restart lại lần cuối**.
+
+**Xử lý:** `kubectl apply -f frontend-depl.yaml` lại + `kubectl rollout restart deployment/frontend-depl` → verify biến môi trường trong pod mới đầy đủ → test lại `POST /api/cart/checkout` qua `curl` trả về `200`/`/checkout` đúng như mong đợi.
+
+**Bài học:** sau khi vá nhiều manifest trong 1 phiên làm việc dài, cần rà soát lại xem MỌI deployment đã sửa đều thực sự được `apply` + `restart` lần cuối cùng — không chỉ dựa vào việc file trên đĩa đã đúng, vì có thể có khoảng trống giữa lúc patch file và lúc restart thực tế (nhất là khi patch nhiều file rải rác qua nhiều bước).
+
+### Sự cố thứ 2 — lỗi khi PayPal redirect về sau khi thanh toán xong
+
+Sau khi fix giỏ hàng, người dùng test tiếp tới bước thanh toán PayPal thật (sandbox) — thanh toán xong, PayPal redirect trình duyệt về `localhost:8888/checkout/success?token=...&PayerID=...` thay vì `ecommerce.local`, trang báo lỗi "Order Cancelled — Có lỗi trong quá trình thanh toán".
+
+**Nguyên nhân:** `PayPalService.java` (payment-service) build `return_url`/`cancel_url` gửi cho PayPal từ biến `frontendBaseUrl` (`@Value("${frontend.base-url:http://localhost:8888}")`) — `payment-depl.yaml` **chưa từng khai báo** `FRONTEND_BASE_URL`, nên rơi về mặc định `localhost:8888` (địa chỉ dev local, không phải domain Ingress `ecommerce.local` mà người dùng đang truy cập). PayPal dùng URL này để redirect **trình duyệt của người dùng** (chạy ngoài cluster) sau khi thanh toán — sai domain khiến bước capture/xác nhận đơn hàng thất bại.
+
+**Xử lý:** thêm `FRONTEND_BASE_URL=http://ecommerce.local` vào `payment-depl.yaml`, `kubectl apply` + `rollout restart` — verify biến môi trường trong pod mới đúng.
+
+**Lưu ý:** đây là link PayPal cũ (token đã dùng/hết hạn) nên không thể test lại được — người dùng cần bắt đầu lại từ đầu (thêm sản phẩm vào giỏ, checkout, thanh toán PayPal mới) để kiểm tra bản vá.
+

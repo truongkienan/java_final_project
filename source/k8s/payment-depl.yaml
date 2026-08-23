@@ -25,6 +25,8 @@ spec:
               value: "pa55w0rd!"
             - name: SPRING_RABBITMQ_HOST
               value: "rabbitmq-clusterip-srv"
+            - name: FRONTEND_BASE_URL
+              value: "http://ecommerce.local"
 ---
 apiVersion: v1
 kind: Service

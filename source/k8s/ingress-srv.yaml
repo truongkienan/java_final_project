@@ -57,6 +57,13 @@ spec:
                 name: basket-clusterip-srv
                 port:
                   number: 8083
+          - path: /api/stocks
+            pathType: Prefix
+            backend:
+              service:
+                name: inventory-clusterip-srv
+                port:
+                  number: 8086
           - path: /
             pathType: Prefix
             backend:
@@ -64,5 +71,4 @@ spec:
                 name: frontend-srv
                 port:
                   number: 8080
-
 

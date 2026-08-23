@@ -1,45 +1,44 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order-depl
+  name: inventory-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: order
+      app: inventory
   template:
     metadata:
       labels:
-        app: order
+        app: inventory
     spec:
       containers:
-        - name: order
-          image: order-service:latest
+        - name: inventory
+          image: inventory-service:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8084
+            - containerPort: 8086
           env:
+            # Ghi đè URL kết nối Database thành tên nội bộ của K8s
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:sqlserver://mssql-clusterip-srv:1433;databaseName=EcommerceDB;encrypt=true;trustServerCertificate=true;"
-            - name: SPRING_DATASOURCE_USERNAME
-              value: "sa"
+            # Ghi đè mật khẩu (nếu cần)
             - name: SPRING_DATASOURCE_PASSWORD
               value: "pa55w0rd!"
+            # Ghi đè RabbitMQ Host thành tên nội bộ của K8s
             - name: SPRING_RABBITMQ_HOST
               value: "rabbitmq-clusterip-srv"
-            - name: GRPC_CLIENT_CATALOGSERVICE_ADDRESS
-              value: "static://catalog-srv:9090"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: order-clusterip-srv
+  name: inventory-clusterip-srv
 spec:
   type: ClusterIP
   selector:
-    app: order
+    app: inventory
   ports:
-    - name: order
+    - name: inventory
       protocol: TCP
-      port: 8084
-      targetPort: 8084
+      port: 8086
+      targetPort: 8086

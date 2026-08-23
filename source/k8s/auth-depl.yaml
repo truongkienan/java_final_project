@@ -26,6 +26,9 @@ spec:
             # Ghi đè mật khẩu (nếu cần)
             - name: SPRING_DATASOURCE_PASSWORD
               value: "pa55w0rd!"
+            # Ghi đè URL gọi sang customer-service để xác thực khách hàng (luồng customer-login)
+            - name: CUSTOMER_SERVICE_URL
+              value: "http://customer-srv:8082/api/members"
 
 ---
 apiVersion: v1

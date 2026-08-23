@@ -26,8 +26,22 @@ spec:
               value: "http://catalog-srv:8081/api/categories"
             - name: BACKEND_API_GATEWAY_URL
               value: "http://auth-srv:8085"
-            - name: BASKET_SERVICE_URL
-              value: "http://basket-clusterip-srv:8083/api/baskets"
+            - name: ORDER_SERVICE_URL
+              value: "http://order-clusterip-srv:8084/api/orders"
+            - name: PAYMENT_SERVICE_URL
+              value: "http://payment-clusterip-srv:8080/api/payments"
+            - name: CUSTOMER_SERVICE_URL
+              value: "http://customer-srv:8082/api/members"
+            - name: ADDRESS_SERVICE_URL
+              value: "http://customer-srv:8082/api/addresses"
+            - name: INVENTORY_SERVICE_URL
+              value: "http://inventory-clusterip-srv:8086/api/stocks"
+            - name: USER_SERVICE_URL
+              value: "http://auth-srv:8085/api/users"
+            - name: ROLE_SERVICE_URL
+              value: "http://auth-srv:8085/api/roles"
+            - name: PERMISSION_SERVICE_URL
+              value: "http://auth-srv:8085/api/permissions"
 
 ---
 apiVersion: v1
