@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashSet;
 
@@ -56,5 +58,23 @@ public class AdminAuthController {
         session.removeAttribute("adminJwtToken");
         session.removeAttribute("permissions");
         return "redirect:/admin/login";
+    }
+
+    // Form đổi mật khẩu cho chính tài khoản Admin/Staff đang đăng nhập - tái sử dụng
+    // AuthApiService.changePassword() (gọi auth-service, xác thực bằng username trong session "adminUsername").
+    @GetMapping("/change-password")
+    public String showChangePasswordForm() {
+        return "admin/change-password";
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(@RequestParam("oldPassword") String oldPassword,
+                                 @RequestParam("newPassword") String newPassword,
+                                 HttpSession session, RedirectAttributes redirectAttributes) {
+        String username = (String) session.getAttribute("adminUsername");
+        boolean success = authApiService.changePassword(username, oldPassword, newPassword);
+        redirectAttributes.addFlashAttribute(success ? "passwordMessage" : "passwordError",
+                success ? "Đổi mật khẩu thành công!" : "Mật khẩu cũ không đúng!");
+        return "redirect:/admin/change-password";
     }
 }
