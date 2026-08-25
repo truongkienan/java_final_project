@@ -13,6 +13,10 @@ target/
 # Log files
 *.log
 
+# Trang thai runtime tu sinh boi start-all.sh/stop-all.sh (PID cac service local)
+source/.pids
+source/logs/
+
 # 2 git repo độc lập không liên quan, nằm lẫn trong thư mục này
 /WebAPI401/
 /WebApp401/

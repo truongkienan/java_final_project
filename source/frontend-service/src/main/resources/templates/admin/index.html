@@ -121,7 +121,7 @@
                             <td th:text="${#strings.substring(order.id, 0, 8)}"></td>
                             <td th:text="${order.memberId}"></td>
                             <td th:text="${#strings.substring(order.orderDate, 0, 10)}"></td>
-                            <td th:text="${order.totalAmount}"></td>
+                            <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}"></td>
                             <td>
                                 <span th:if="${order.status == 'PAID'}" class="badge badge-success" th:text="${order.status}">PAID</span>
                                 <span th:if="${order.status == 'PENDING'}" class="badge badge-warning" th:text="${order.status}">PENDING</span>

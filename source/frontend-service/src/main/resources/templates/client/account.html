@@ -47,7 +47,7 @@
                         <td th:text="${#strings.substring(order.id, 0, 8)}"></td>
                         <td th:text="${#strings.substring(order.orderDate, 0, 10)}"></td>
                         <td th:text="${order.details.size()}"></td>
-                        <td th:text="${order.totalAmount}"></td>
+                        <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}"></td>
                         <td th:text="${order.status}"></td>
                         <td>
                             <form th:if="${order.status == 'PENDING'}" th:action="@{/account/orders/{id}/cancel(id=${order.id})}" method="post" style="display:inline;">
