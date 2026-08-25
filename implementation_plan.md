@@ -948,3 +948,26 @@ Sau khi fix giỏ hàng, người dùng test tiếp tới bước thanh toán Pa
 
 **Lưu ý:** đây là link PayPal cũ (token đã dùng/hết hạn) nên không thể test lại được — người dùng cần bắt đầu lại từ đầu (thêm sản phẩm vào giỏ, checkout, thanh toán PayPal mới) để kiểm tra bản vá.
 
+### Sự cố thứ 3 — trang Admin Login mất hoàn toàn CSS/JS (lỗi code, không phải deploy)
+
+Người dùng test trang `/admin/login` qua trình duyệt, giao diện hiển thị HTML thô không style (font mặc định trình duyệt).
+
+**Nguyên nhân:** `AdminAuthInterceptor` (`AppConfig.java`, frontend-service) áp `addPathPatterns("/admin/**")` cho toàn bộ đường dẫn bắt đầu `/admin/`, chỉ `excludePathPatterns("/admin/login", "/admin/access-denied")`. Vì các tài nguyên tĩnh của khu Admin (`static/admin/css/`, `static/admin/js/`, `static/admin/assets/`) cũng được Spring Boot map vào URL cùng tiền tố `/admin/`, nên MỌI request tới CSS/JS (kể cả của chính trang login) bị Interceptor coi là route cần đăng nhập và redirect `302` về `/admin/login` — verify qua `curl -i http://ecommerce.local/admin/css/styles.css` thấy `302 Location: /admin/login`. Đây là lỗi logic có sẵn trong code, không liên quan tới k8s/deploy.
+
+**Xử lý (theo quy trình Guide-Don't-Fix — dán code qua chat):** vá `AppConfig.java`, thêm `"/admin/css/**", "/admin/js/**", "/admin/assets/**"` vào `excludePathPatterns`. Build lại (`mvn package -DskipTests` → `docker build -t frontend-service:latest .`) → `kubectl rollout restart deployment/frontend-depl`. Verify: `/admin/css/styles.css`, `/admin/js/scripts.js`, `/admin/assets/demo/chart-area-demo.js` đều `200`; `/admin` (dashboard, chưa đăng nhập) vẫn `302` về login đúng như thiết kế — xác nhận không làm lộ route quản trị nào ngoài static assets.
+
+## Tính năng: Đổi mật khẩu cho tài khoản Admin/Staff sau khi đăng nhập
+
+**Yêu cầu người dùng:** thêm chức năng đổi mật khẩu khi đã đăng nhập vào Admin Dashboard.
+
+**Khảo sát trước khi làm:** phát hiện `POST /api/auth/change-password` (auth-service, `AuthController.java`) đã tồn tại sẵn, xác thực bằng `username` (bảng `users` — đúng bảng chứa tài khoản Admin/Staff, khác `members` bên customer-service dùng cho khách hàng). `AuthApiService.changePassword(username, oldPassword, newPassword)` (frontend-service) cũng đã có sẵn, đang được dùng cho trang tài khoản khách hàng cũ (nay khách hàng đã chuyển sang dùng `CustomerApiService.changeMemberPassword` vì đổi bảng lưu trữ) — tái sử dụng lại được nguyên vẹn cho Admin, không cần thêm endpoint backend mới.
+
+**Triển khai (theo quy trình Guide-Don't-Fix):**
+- `AdminController.java`: thêm `GET /admin/change-password` (hiển thị form) và `POST /admin/change-password` (lấy `username` từ session `adminUsername`, gọi `authApiService.changePassword(...)`, phản hồi qua `RedirectAttributes` flash attribute `passwordMessage`/`passwordError`, theo đúng pattern các action khác trong file như `saveInventory`/`rejectRefund`).
+- Template mới `admin/change-password.html`: decorate `admin/_layout`, breadcrumb + card + form (mật khẩu hiện tại/mới), theo đúng pattern `user-form.html`.
+- `admin/fragments/_header.html`: thêm link "Đổi mật khẩu" vào dropdown user (trước Logout).
+- Route `/admin/change-password` vẫn nằm trong `AdminAuthInterceptor` (`/admin/**`, không nằm trong danh sách loại trừ) nên tự động yêu cầu đã đăng nhập — không cần thêm code kiểm tra quyền riêng; không match bất kỳ `resolveRequiredPermission()` prefix nào nên chỉ cần đã đăng nhập (bất kỳ quyền gì) là đổi được mật khẩu của chính mình.
+- Build (`mvn package -DskipTests` → `docker build -t frontend-service:latest .`) → `kubectl rollout restart deployment/frontend-depl`. Verify qua `curl`: `/admin/change-password` khi chưa đăng nhập trả về `302` (đúng thiết kế, không bị lộ), các endpoint khác (`/admin/login`, static assets, trang chủ) vẫn `200` bình thường.
+- **Lưu ý:** password trong bảng `users` (auth-service) hiện lưu dạng plain text (không hash) — quy ước có sẵn từ trước trong dự án (comment xác nhận trong `AuthController.java`), không phải thứ được thay đổi bởi tính năng này.
+- **Còn lại:** người dùng cần tự đăng nhập Admin Dashboard qua trình duyệt, vào dropdown góc phải trên cùng → "Đổi mật khẩu" để test luồng thật.
+

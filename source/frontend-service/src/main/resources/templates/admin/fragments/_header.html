@@ -19,6 +19,8 @@
                     <i class="fas fa-user fa-fw"></i> <span th:text="${session.adminUsername}"></span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                    <a class="dropdown-item" th:href="@{/admin/change-password}">Đổi mật khẩu</a>
+                    <div class="dropdown-divider"></div>
                     <a class="dropdown-item" th:href="@{/admin/logout}">Logout</a>
                 </div>
             </li>

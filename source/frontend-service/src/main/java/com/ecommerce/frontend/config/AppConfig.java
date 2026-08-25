@@ -15,12 +15,17 @@ public class AppConfig implements WebMvcConfigurer {
     }
 
     // Chặn toàn bộ /admin/** nếu chưa đăng nhập hoặc không đủ permission,
-    // trừ trang đăng nhập Admin và trang thông báo từ chối truy cập.
+    // trừ trang đăng nhập Admin, trang thông báo từ chối truy cập,
+    // và các thư mục tài nguyên tĩnh (css/js/assets) vì chúng dùng chung tiền tố /admin/
+    // với các route quản trị nhưng phải luôn truy cập được kể cả khi chưa đăng nhập
+    // (nếu không, ngay cả CSS/JS của chính trang login cũng bị chặn theo).
     // (/admin/register đã bị xóa - không còn cần loại trừ nữa)
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new AdminAuthInterceptor())
                 .addPathPatterns("/admin/**")
-                .excludePathPatterns("/admin/login", "/admin/access-denied");
+                .excludePathPatterns(
+                        "/admin/login", "/admin/access-denied",
+                        "/admin/css/**", "/admin/js/**", "/admin/assets/**");
     }
 }

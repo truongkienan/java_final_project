@@ -1,5 +1,6 @@
 package com.ecommerce.frontend.controller;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -340,5 +341,23 @@ public class AdminController {
         redirectAttributes.addFlashAttribute(success ? "inventoryMessage" : "inventoryError",
                 success ? "Đã cập nhật tồn kho." : "Không thể cập nhật tồn kho.");
         return "redirect:/admin/inventory";
+    }
+
+    // Form đổi mật khẩu cho chính tài khoản Admin/Staff đang đăng nhập - tái sử dụng
+    // AuthApiService.changePassword() (gọi auth-service, xác thực bằng username trong session "adminUsername").
+    @GetMapping("/change-password")
+    public String showChangePasswordForm() {
+        return "admin/change-password";
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(@RequestParam("oldPassword") String oldPassword,
+                                 @RequestParam("newPassword") String newPassword,
+                                 HttpSession session, RedirectAttributes redirectAttributes) {
+        String username = (String) session.getAttribute("adminUsername");
+        boolean success = authApiService.changePassword(username, oldPassword, newPassword);
+        redirectAttributes.addFlashAttribute(success ? "passwordMessage" : "passwordError",
+                success ? "Đổi mật khẩu thành công!" : "Mật khẩu cũ không đúng!");
+        return "redirect:/admin/change-password";
     }
 }
