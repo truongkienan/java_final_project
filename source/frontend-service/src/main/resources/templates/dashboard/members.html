@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{dashboard/_layout}">
+
+<head>
+    <title>Quản lý Tài khoản - Admin</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <h1 class="mt-4">Tài khoản</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Tài khoản</li>
+        </ol>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table mr-1"></i> Danh sách Tài khoản
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="member : ${members}">
+                            <td th:text="${member.username}">username</td>
+                            <td th:text="${member.email}">email@example.com</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

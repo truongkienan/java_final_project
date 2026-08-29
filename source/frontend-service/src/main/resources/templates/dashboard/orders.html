@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{dashboard/_layout}">
+
+<head>
+    <title>Quản lý Đơn hàng - Admin</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <h1 class="mt-4">Đơn hàng</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Đơn hàng</li>
+        </ol>
+
+        <div th:if="${orderMessage}" class="alert alert-success" th:text="${orderMessage}"></div>
+        <div th:if="${orderError}" class="alert alert-danger" th:text="${orderError}"></div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table mr-1"></i> Danh sách Đơn hàng
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>Mã đơn hàng</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Số sản phẩm</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="order : ${orders}">
+                            <td th:text="${#strings.substring(order.id, 0, 8)}">abcd1234</td>
+                            <td th:text="${order.memberId}">user123</td>
+                            <td th:text="${#strings.substring(order.orderDate, 0, 10)}">2026-08-15</td>
+                            <td th:text="${order.details.size()}">1</td>
+                            <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}">100000</td>
+                            <td>
+                                <span th:if="${order.status == 'PAID'}" class="badge badge-success" th:text="${order.status}">PAID</span>
+                                <span th:if="${order.status == 'PENDING'}" class="badge badge-warning" th:text="${order.status}">PENDING</span>
+                                <span th:if="${order.status == 'CANCELLED'}" class="badge badge-danger" th:text="${order.status}">CANCELLED</span>
+                                <span th:if="${order.status == 'FAILED'}" class="badge badge-dark" th:text="${order.status}">FAILED</span>
+                                <span th:if="${order.status == 'REFUND_REQUESTED'}" class="badge badge-info" th:text="${order.status}">REFUND_REQUESTED</span>
+                                <span th:if="${order.status == 'REFUNDED'}" class="badge badge-secondary" th:text="${order.status}">REFUNDED</span>
+                            </td>
+                            <td>
+                                <form th:if="${order.status == 'PENDING'}" th:action="@{/dashboard/orders/{id}/cancel(id=${order.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Hủy đơn hàng này?')">Hủy đơn</button>
+                                </form>
+                                <form th:if="${order.status == 'PAID'}" th:action="@{/dashboard/orders/{id}/refund(id=${order.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Hoàn tiền cho đơn hàng này?')">Hoàn tiền</button>
+                                </form>
+                                <span th:if="${order.status == 'REFUND_REQUESTED'}">
+                                    <form th:action="@{/dashboard/orders/{id}/refund(id=${order.id})}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Duyệt hoàn tiền cho đơn hàng này?')">Duyệt hoàn tiền</button>
+                                    </form>
+                                    <form th:action="@{/dashboard/orders/{id}/reject-refund(id=${order.id})}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-secondary" onclick="return confirm('Từ chối yêu cầu hoàn tiền này?')">Từ chối</button>
+                                    </form>
+                                </span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

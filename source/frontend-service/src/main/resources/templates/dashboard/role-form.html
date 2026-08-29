@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{dashboard/_layout}">
+
+<head>
+    <title>Form Role - Admin</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <h1 class="mt-4" th:text="${role.roleId == null ? 'Thêm mới Role' : 'Cập nhật Role'}">Form</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a th:href="@{/dashboard/roles}">Danh sách Role</a></li>
+            <li class="breadcrumb-item active">Form</li>
+        </ol>
+
+        <div class="card mb-4" style="max-width: 600px;">
+            <div class="card-body">
+                <form th:action="@{/dashboard/roles/save}" th:object="${role}" method="post">
+                    <input type="hidden" th:field="*{roleId}" />
+
+                    <div class="form-group">
+                        <label>Tên Role</label>
+                        <input type="text" class="form-control" th:field="*{roleName}" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <textarea class="form-control" th:field="*{description}" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Permission</label>
+                        <div th:each="perm : ${allPermissions}" class="form-check">
+                            <input type="checkbox" class="form-check-input" th:field="*{permissionIds}"
+                                   th:value="${perm.permissionId}" />
+                            <label class="form-check-label" th:text="${perm.permissionName} + ' - ' + ${perm.description}"></label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">Lưu dữ liệu</button>
+                    <a th:href="@{/dashboard/roles}" class="btn btn-secondary">Hủy bỏ</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>
