@@ -26,20 +26,20 @@
                             </div>
                             <div class="card-body">
                                 <form th:action="@{/dashboard/login}" th:object="${loginRequest}" method="post">
-                                    <!-- Hiển thị lỗi nếu có -->
+                                    <!-- Show error if any -->
                                     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-                                    <div th:if="${param.registered}" class="alert alert-success">Đăng ký thành công,
-                                        mời đăng nhập!</div>
+                                    <div th:if="${param.registered}" class="alert alert-success">Registration
+                                        successful, please log in!</div>
 
                                     <div class="form-group">
-                                        <label>Tên đăng nhập *</label>
+                                        <label>Username *</label>
                                         <input type="text" th:field="*{username}" class="form-control" required>
                                     </div>
                                     <div class="form-group">
-                                        <label>Mật khẩu *</label>
+                                        <label>Password *</label>
                                         <input type="password" th:field="*{password}" class="form-control" required>
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                                    <button type="submit" class="btn btn-primary">Login</button>
                                 </form>
 
                             </div>

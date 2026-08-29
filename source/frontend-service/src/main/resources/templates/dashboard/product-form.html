@@ -3,16 +3,16 @@
     layout:decorate="~{dashboard/_layout}">
 
 <head>
-    <title>Form Sản phẩm - Admin</title>
+    <title>Product Form - Admin</title>
 </head>
 
 <body>
     <div layout:fragment="content">
         <div class="container-fluid">
-            <h1 class="mt-4" th:text="${product.productId == null ? 'Thêm mới Sản phẩm' : 'Cập nhật Sản phẩm'}">Form
+            <h1 class="mt-4" th:text="${product.productId == null ? 'Add New Product' : 'Update Product'}">Form
             </h1>
             <ol class="breadcrumb mb-4">
-                <li class="breadcrumb-item"><a th:href="@{/dashboard/products}">Danh sách Sản phẩm</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/dashboard/products}">Product List</a></li>
                 <li class="breadcrumb-item active">Form</li>
             </ol>
 
@@ -22,20 +22,20 @@
                         <input type="hidden" th:field="*{productId}" />
 
                         <div class="form-group">
-                            <label>Tên sản phẩm</label>
+                            <label>Product Name</label>
                             <input type="text" class="form-control" th:field="*{productName}" required />
                         </div>
                         <div class="form-group">
-                            <label>Giá bán (VNĐ)</label>
+                            <label>Price (VND)</label>
                             <input type="number" step="1000" class="form-control" th:field="*{unitPrice}" />
                         </div>
                         <div class="form-group">
-                            <label>Đường dẫn hình ảnh</label>
+                            <label>Image URL</label>
                             <input type="text" class="form-control" th:field="*{imageUrl}" />
                         </div>
 
-                        <button type="submit" class="btn btn-success">Lưu dữ liệu</button>
-                        <a th:href="@{/dashboard/products}" class="btn btn-secondary">Hủy bỏ</a>
+                        <button type="submit" class="btn btn-success">Save</button>
+                        <a th:href="@{/dashboard/products}" class="btn btn-secondary">Cancel</a>
                     </form>
                 </div>
             </div>

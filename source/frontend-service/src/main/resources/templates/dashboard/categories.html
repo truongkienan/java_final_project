@@ -3,22 +3,22 @@
       layout:decorate="~{dashboard/_layout}">
 
 <head>
-    <title>Quản lý Danh mục - Admin</title>
+    <title>Category Management - Admin</title>
 </head>
 
 <body>
 <div layout:fragment="content">
     <div class="container-fluid">
-        <h1 class="mt-4">Danh mục</h1>
-        <a th:href="@{/dashboard/categories/new}" class="btn btn-primary mb-3">Thêm danh mục mới</a>
+        <h1 class="mt-4">Categories</h1>
+        <a th:href="@{/dashboard/categories/new}" class="btn btn-primary mb-3">Add New Category</a>
         <ol class="breadcrumb mb-4">
             <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
-            <li class="breadcrumb-item active">Danh mục</li>
+            <li class="breadcrumb-item active">Categories</li>
         </ol>
 
         <div class="card mb-4">
             <div class="card-header">
-                <i class="fas fa-table mr-1"></i> Danh sách Danh mục
+                <i class="fas fa-table mr-1"></i> Category List
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -26,11 +26,11 @@
                         <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Tên danh mục</th>
-                            <th>Danh mục cha</th>
-                            <th>Hình ảnh</th>
-                            <th>Trạng thái</th>
-                            <th>Hành động</th>
+                            <th>Category Name</th>
+                            <th>Parent Category</th>
+                            <th>Image</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -38,16 +38,16 @@
                             <td th:text="${cat.categoryId}">1</td>
                             <td>
                                         <span th:style="${cat.parentId == null} ? 'font-weight:bold;' : 'padding-left:25px;'"
-                                              th:text="${cat.parentId != null ? '↳ ' : ''} + ${cat.categoryName}">Tên Category</span>
+                                              th:text="${cat.parentId != null ? '↳ ' : ''} + ${cat.categoryName}">Category Name</span>
                             </td>
-                            <td th:text="${cat.parentName != null ? cat.parentName : '— (Cấp 1)'}">—</td>
+                            <td th:text="${cat.parentName != null ? cat.parentName : '— (Top level)'}">—</td>
                             <td>
                                 <img th:if="${cat.imageUrl != null}" th:src="${cat.imageUrl}"
                                      style="width: 50px; height: 50px; object-fit: cover;" />
                             </td>
                             <td>
                                 <span th:if="${cat.active}" class="badge badge-success">Active</span>
-                                <span th:unless="${cat.active}" class="badge badge-secondary">Ẩn</span>
+                                <span th:unless="${cat.active}" class="badge badge-secondary">Hidden</span>
                             </td>
                             <td>
                                 <a th:href="@{/dashboard/categories/edit/{id}(id=${cat.categoryId})}"
@@ -55,7 +55,7 @@
                                 <form th:action="@{/dashboard/categories/delete/{id}(id=${cat.categoryId})}"
                                       method="post" style="display:inline;">
                                     <button type="submit" class="btn btn-sm btn-danger"
-                                            onclick="return confirm('Bạn có chắc chắn muốn xóa Danh mục này?')">Xóa</button>
+                                            onclick="return confirm('Are you sure you want to delete this category?')">Delete</button>
                                 </form>
                             </td>
                         </tr>

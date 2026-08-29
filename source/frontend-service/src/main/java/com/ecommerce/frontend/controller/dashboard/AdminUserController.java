@@ -59,7 +59,7 @@ public class AdminUserController {
     public String createUser(@ModelAttribute("newUser") UserDto userDto, Model model) {
         boolean success = authApiService.register(userDto);
         if (!success) {
-            model.addAttribute("error", "Tạo tài khoản thất bại, username có thể đã tồn tại!");
+            model.addAttribute("error", "Failed to create account, username may already exist!");
             model.addAttribute("allRoles", roleApiService.getAllRoles());
             return "dashboard/user-form";
         }

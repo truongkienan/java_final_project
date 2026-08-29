@@ -53,7 +53,7 @@ public class AdminInventoryController {
                                 RedirectAttributes redirectAttributes) {
         boolean success = inventoryApiService.updateStock(productId, quantity);
         redirectAttributes.addFlashAttribute(success ? "inventoryMessage" : "inventoryError",
-                success ? "Đã cập nhật tồn kho." : "Không thể cập nhật tồn kho.");
+                success ? "Inventory updated." : "Unable to update inventory.");
         return "redirect:/dashboard/inventory";
     }
 }

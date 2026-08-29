@@ -3,16 +3,16 @@
       layout:decorate="~{dashboard/_layout}">
 
 <head>
-    <title>Quản lý Tồn kho - Admin</title>
+    <title>Inventory Management - Admin</title>
 </head>
 
 <body>
 <div layout:fragment="content">
     <div class="container-fluid">
-        <h1 class="mt-4">Tồn kho</h1>
+        <h1 class="mt-4">Inventory</h1>
         <ol class="breadcrumb mb-4">
             <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
-            <li class="breadcrumb-item active">Tồn kho</li>
+            <li class="breadcrumb-item active">Inventory</li>
         </ol>
 
         <div th:if="${inventoryMessage}" class="alert alert-success" th:text="${inventoryMessage}"></div>
@@ -20,17 +20,17 @@
 
         <div class="card mb-4">
             <div class="card-header">
-                <i class="fas fa-table mr-1"></i> Danh sách Tồn kho
+                <i class="fas fa-table mr-1"></i> Inventory List
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                         <tr>
-                            <th>Mã SP</th>
-                            <th>Tên sản phẩm</th>
-                            <th>Số lượng tồn</th>
-                            <th>Hành động</th>
+                            <th>Product ID</th>
+                            <th>Product Name</th>
+                            <th>Stock Quantity</th>
+                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -42,7 +42,7 @@
                                 <form th:action="@{/dashboard/inventory/save}" method="post" style="display:flex; gap:8px; align-items:center;">
                                     <input type="hidden" name="productId" th:value="${stock.productId}" />
                                     <input type="number" name="quantity" th:value="${stock.quantity}" min="0" class="form-control" style="width:120px;" />
-                                    <button type="submit" class="btn btn-sm btn-primary">Cập nhật</button>
+                                    <button type="submit" class="btn btn-sm btn-primary">Update</button>
                                 </form>
                             </td>
                         </tr>

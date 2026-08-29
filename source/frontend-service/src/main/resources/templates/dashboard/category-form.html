@@ -3,16 +3,16 @@
       layout:decorate="~{dashboard/_layout}">
 
 <head>
-    <title>Form Danh mục - Admin</title>
+    <title>Category Form - Admin</title>
 </head>
 
 <body>
 <div layout:fragment="content">
     <div class="container-fluid">
-        <h1 class="mt-4" th:text="${category.categoryId == null ? 'Thêm mới Danh mục' : 'Cập nhật Danh mục'}">Form
+        <h1 class="mt-4" th:text="${category.categoryId == null ? 'Add New Category' : 'Update Category'}">Form
         </h1>
         <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item"><a th:href="@{/dashboard/categories}">Danh sách Danh mục</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/dashboard/categories}">Category List</a></li>
             <li class="breadcrumb-item active">Form</li>
         </ol>
 
@@ -22,40 +22,40 @@
                     <input type="hidden" th:field="*{categoryId}" />
 
                     <div class="form-group">
-                        <label>Tên danh mục</label>
+                        <label>Category Name</label>
                         <input type="text" class="form-control" th:field="*{categoryName}" required />
                     </div>
                     <div class="form-group">
-                        <label>Slug (đường dẫn, viết liền không dấu, cách nhau bằng "-")</label>
+                        <label>Slug (URL-friendly, no diacritics, words separated by "-")</label>
                         <input type="text" class="form-control" th:field="*{slug}" required />
                     </div>
                     <div class="form-group">
-                        <label>Mô tả</label>
+                        <label>Description</label>
                         <textarea class="form-control" th:field="*{description}" rows="3"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Đường dẫn hình ảnh</label>
+                        <label>Image URL</label>
                         <input type="text" class="form-control" th:field="*{imageUrl}" />
                     </div>
                     <div class="form-group">
-                        <label>Danh mục cha (để trống nếu là danh mục cấp 1)</label>
+                        <label>Parent Category (leave blank for top-level category)</label>
                         <select class="form-control" th:field="*{parentId}">
-                            <option value="">-- Không có (danh mục cấp 1) --</option>
+                            <option value="">-- None (top-level category) --</option>
                             <option th:each="p : ${parentCategories}" th:value="${p.categoryId}"
                                     th:text="${p.categoryName}"></option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Thứ tự hiển thị</label>
+                        <label>Display Order</label>
                         <input type="number" class="form-control" th:field="*{position}" />
                     </div>
                     <div class="form-check mb-3">
                         <input type="checkbox" class="form-check-input" th:field="*{active}" />
-                        <label class="form-check-label">Hiển thị (Active)</label>
+                        <label class="form-check-label">Visible (Active)</label>
                     </div>
 
-                    <button type="submit" class="btn btn-success">Lưu dữ liệu</button>
-                    <a th:href="@{/dashboard/categories}" class="btn btn-secondary">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <a th:href="@{/dashboard/categories}" class="btn btn-secondary">Cancel</a>
                 </form>
             </div>
         </div>

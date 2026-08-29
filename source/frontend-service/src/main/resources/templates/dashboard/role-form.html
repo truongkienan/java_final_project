@@ -3,15 +3,15 @@
       layout:decorate="~{dashboard/_layout}">
 
 <head>
-    <title>Form Role - Admin</title>
+    <title>Role Form - Admin</title>
 </head>
 
 <body>
 <div layout:fragment="content">
     <div class="container-fluid">
-        <h1 class="mt-4" th:text="${role.roleId == null ? 'Thêm mới Role' : 'Cập nhật Role'}">Form</h1>
+        <h1 class="mt-4" th:text="${role.roleId == null ? 'Add New Role' : 'Update Role'}">Form</h1>
         <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item"><a th:href="@{/dashboard/roles}">Danh sách Role</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/dashboard/roles}">Role List</a></li>
             <li class="breadcrumb-item active">Form</li>
         </ol>
 
@@ -21,11 +21,11 @@
                     <input type="hidden" th:field="*{roleId}" />
 
                     <div class="form-group">
-                        <label>Tên Role</label>
+                        <label>Role Name</label>
                         <input type="text" class="form-control" th:field="*{roleName}" required />
                     </div>
                     <div class="form-group">
-                        <label>Mô tả</label>
+                        <label>Description</label>
                         <textarea class="form-control" th:field="*{description}" rows="3"></textarea>
                     </div>
                     <div class="form-group">
@@ -37,8 +37,8 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-success">Lưu dữ liệu</button>
-                    <a th:href="@{/dashboard/roles}" class="btn btn-secondary">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <a th:href="@{/dashboard/roles}" class="btn btn-secondary">Cancel</a>
                 </form>
             </div>
         </div>

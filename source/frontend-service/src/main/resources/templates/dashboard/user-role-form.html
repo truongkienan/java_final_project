@@ -3,16 +3,16 @@
       layout:decorate="~{dashboard/_layout}">
 
 <head>
-    <title>Đổi Role tài khoản - Admin</title>
+    <title>Change User Role - Admin</title>
 </head>
 
 <body>
 <div layout:fragment="content">
     <div class="container-fluid">
-        <h1 class="mt-4">Đổi Role tài khoản</h1>
+        <h1 class="mt-4">Change User Role</h1>
         <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item"><a th:href="@{/dashboard/users}">Danh sách tài khoản</a></li>
-            <li class="breadcrumb-item active">Đổi Role</li>
+            <li class="breadcrumb-item"><a th:href="@{/dashboard/users}">User List</a></li>
+            <li class="breadcrumb-item active">Change Role</li>
         </ol>
 
         <div class="card mb-4" style="max-width: 500px;">
@@ -32,11 +32,11 @@
                     </div>
                     <div class="form-check mb-3">
                         <input type="checkbox" class="form-check-input" th:field="*{active}" />
-                        <label class="form-check-label">Active (bỏ tick để thu hồi quyền đăng nhập)</label>
+                        <label class="form-check-label">Active (uncheck to revoke login access)</label>
                     </div>
 
-                    <button type="submit" class="btn btn-success">Lưu dữ liệu</button>
-                    <a th:href="@{/dashboard/users}" class="btn btn-secondary">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <a th:href="@{/dashboard/users}" class="btn btn-secondary">Cancel</a>
                 </form>
             </div>
         </div>

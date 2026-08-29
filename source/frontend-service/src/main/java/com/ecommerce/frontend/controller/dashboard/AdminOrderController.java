@@ -31,7 +31,7 @@ public class AdminOrderController {
     public String cancelOrder(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         boolean success = orderApiService.cancelOrder(id);
         redirectAttributes.addFlashAttribute(success ? "orderMessage" : "orderError",
-                success ? "Đã hủy đơn hàng." : "Không thể hủy đơn hàng này.");
+                success ? "Order cancelled." : "Unable to cancel this order.");
         return "redirect:/dashboard/orders";
     }
 
@@ -41,7 +41,7 @@ public class AdminOrderController {
     public String refundOrder(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         boolean success = paymentApiService.refundPaypalOrder(id);
         redirectAttributes.addFlashAttribute(success ? "orderMessage" : "orderError",
-                success ? "Đã hoàn tiền." : "Không thể hoàn tiền cho đơn hàng này.");
+                success ? "Refunded." : "Unable to refund this order.");
         return "redirect:/dashboard/orders";
     }
 
@@ -50,7 +50,7 @@ public class AdminOrderController {
     public String rejectRefund(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         boolean success = orderApiService.rejectRefund(id);
         redirectAttributes.addFlashAttribute(success ? "orderMessage" : "orderError",
-                success ? "Đã từ chối yêu cầu hoàn tiền." : "Không thể từ chối yêu cầu này.");
+                success ? "Refund request rejected." : "Unable to reject this request.");
         return "redirect:/dashboard/orders";
     }
 }

@@ -3,16 +3,16 @@
       layout:decorate="~{dashboard/_layout}">
 
 <head>
-    <title>Quản lý Đơn hàng - Admin</title>
+    <title>Order Management - Admin</title>
 </head>
 
 <body>
 <div layout:fragment="content">
     <div class="container-fluid">
-        <h1 class="mt-4">Đơn hàng</h1>
+        <h1 class="mt-4">Orders</h1>
         <ol class="breadcrumb mb-4">
             <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
-            <li class="breadcrumb-item active">Đơn hàng</li>
+            <li class="breadcrumb-item active">Orders</li>
         </ol>
 
         <div th:if="${orderMessage}" class="alert alert-success" th:text="${orderMessage}"></div>
@@ -20,20 +20,20 @@
 
         <div class="card mb-4">
             <div class="card-header">
-                <i class="fas fa-table mr-1"></i> Danh sách Đơn hàng
+                <i class="fas fa-table mr-1"></i> Order List
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                         <tr>
-                            <th>Mã đơn hàng</th>
-                            <th>Khách hàng</th>
-                            <th>Ngày đặt</th>
-                            <th>Số sản phẩm</th>
-                            <th>Tổng tiền</th>
-                            <th>Trạng thái</th>
-                            <th>Hành động</th>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Order Date</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -53,17 +53,17 @@
                             </td>
                             <td>
                                 <form th:if="${order.status == 'PENDING'}" th:action="@{/dashboard/orders/{id}/cancel(id=${order.id})}" method="post" style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Hủy đơn hàng này?')">Hủy đơn</button>
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Cancel this order?')">Cancel Order</button>
                                 </form>
                                 <form th:if="${order.status == 'PAID'}" th:action="@{/dashboard/orders/{id}/refund(id=${order.id})}" method="post" style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Hoàn tiền cho đơn hàng này?')">Hoàn tiền</button>
+                                    <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Refund this order?')">Refund</button>
                                 </form>
                                 <span th:if="${order.status == 'REFUND_REQUESTED'}">
                                     <form th:action="@{/dashboard/orders/{id}/refund(id=${order.id})}" method="post" style="display:inline;">
-                                        <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Duyệt hoàn tiền cho đơn hàng này?')">Duyệt hoàn tiền</button>
+                                        <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Approve refund for this order?')">Approve Refund</button>
                                     </form>
                                     <form th:action="@{/dashboard/orders/{id}/reject-refund(id=${order.id})}" method="post" style="display:inline;">
-                                        <button type="submit" class="btn btn-sm btn-secondary" onclick="return confirm('Từ chối yêu cầu hoàn tiền này?')">Từ chối</button>
+                                        <button type="submit" class="btn btn-sm btn-secondary" onclick="return confirm('Reject this refund request?')">Reject</button>
                                     </form>
                                 </span>
                             </td>

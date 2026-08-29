@@ -3,22 +3,22 @@
       layout:decorate="~{dashboard/_layout}">
 
 <head>
-    <title>Quản lý tài khoản - Admin</title>
+    <title>User Management - Admin</title>
 </head>
 
 <body>
 <div layout:fragment="content">
     <div class="container-fluid">
-        <h1 class="mt-4">Quản lý tài khoản</h1>
-        <a th:href="@{/dashboard/users/new}" class="btn btn-primary mb-3">Thêm tài khoản mới</a>
+        <h1 class="mt-4">User Management</h1>
+        <a th:href="@{/dashboard/users/new}" class="btn btn-primary mb-3">Add New User</a>
         <ol class="breadcrumb mb-4">
             <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
-            <li class="breadcrumb-item active">Quản lý tài khoản</li>
+            <li class="breadcrumb-item active">User Management</li>
         </ol>
 
         <div class="card mb-4">
             <div class="card-header">
-                <i class="fas fa-table mr-1"></i> Danh sách tài khoản
+                <i class="fas fa-table mr-1"></i> User List
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -28,8 +28,8 @@
                             <th>ID</th>
                             <th>Username</th>
                             <th>Role</th>
-                            <th>Trạng thái</th>
-                            <th>Hành động</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -39,11 +39,11 @@
                             <td><span class="badge badge-info" th:text="${u.roleName}">ROLE</span></td>
                             <td>
                                 <span th:if="${u.active}" class="badge badge-success">Active</span>
-                                <span th:unless="${u.active}" class="badge badge-secondary">Đã thu hồi</span>
+                                <span th:unless="${u.active}" class="badge badge-secondary">Revoked</span>
                             </td>
                             <td>
                                 <a th:href="@{/dashboard/users/edit/{id}(id=${u.id})}"
-                                   class="btn btn-sm btn-primary">Đổi Role</a>
+                                   class="btn btn-sm btn-primary">Change Role</a>
                             </td>
                         </tr>
                         </tbody>

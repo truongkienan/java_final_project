@@ -3,23 +3,22 @@
     layout:decorate="~{dashboard/_layout}">
 
 <head>
-    <title>Quản lý Sản phẩm - Admin</title>
+    <title>Product Management - Admin</title>
 </head>
 
 <body>
     <div layout:fragment="content">
-        <!-- CHỈ GIỮ LẠI ĐÚNG KHỐI CONTAINER CỦA SẢN PHẨM Ở ĐÂY -->
         <div class="container-fluid">
-            <h1 class="mt-4">Sản phẩm</h1>
-            <a th:href="@{/dashboard/products/new}" class="btn btn-primary mb-3">Thêm sản phẩm mới</a>
+            <h1 class="mt-4">Products</h1>
+            <a th:href="@{/dashboard/products/new}" class="btn btn-primary mb-3">Add New Product</a>
             <ol class="breadcrumb mb-4">
                 <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
-                <li class="breadcrumb-item active">Sản phẩm</li>
+                <li class="breadcrumb-item active">Products</li>
             </ol>
 
             <div class="card mb-4">
                 <div class="card-header">
-                    <i class="fas fa-table mr-1"></i> Danh sách Sản phẩm
+                    <i class="fas fa-table mr-1"></i> Product List
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -27,16 +26,16 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Tên sản phẩm</th>
-                                    <th>Hình ảnh</th>
-                                    <th>Giá bán</th>
-                                    <th>Hành động</th>
+                                    <th>Product Name</th>
+                                    <th>Image</th>
+                                    <th>Price</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr th:each="product : ${products}">
                                     <td th:text="${product.productId}">1</td>
-                                    <td th:text="${product.productName}">Tên sản phẩm</td>
+                                    <td th:text="${product.productName}">Product Name</td>
                                     <td>
                                         <img th:if="${product.imageUrl != null}"
                                             th:src="@{/client/images/{img}(img=${product.imageUrl})}"
@@ -49,7 +48,7 @@
                                         <form th:action="@{/dashboard/products/delete/{id}(id=${product.productId})}"
                                             method="post" style="display:inline;">
                                             <button type="submit" class="btn btn-sm btn-danger"
-                                                onclick="return confirm('Bạn có chắc chắn muốn xóa Sản phẩm này?')">Xóa</button>
+                                                onclick="return confirm('Are you sure you want to delete this product?')">Delete</button>
                                         </form>
 
                                     </td>

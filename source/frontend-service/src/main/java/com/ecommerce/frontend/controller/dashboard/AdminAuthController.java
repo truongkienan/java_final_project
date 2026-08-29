@@ -42,7 +42,7 @@ public class AdminAuthController {
             session.setAttribute("permissions", new HashSet<>(auth.getPermissions()));
             return "redirect:/dashboard";
         }
-        model.addAttribute("error", "Sai tài khoản/mật khẩu, hoặc tài khoản này không có quyền truy cập Admin Dashboard!");
+        model.addAttribute("error", "Invalid username/password, or this account does not have access to the Admin Dashboard!");
         return "dashboard/login";
     }
 
@@ -74,7 +74,7 @@ public class AdminAuthController {
         String username = (String) session.getAttribute("adminUsername");
         boolean success = authApiService.changePassword(username, oldPassword, newPassword);
         redirectAttributes.addFlashAttribute(success ? "passwordMessage" : "passwordError",
-                success ? "Đổi mật khẩu thành công!" : "Mật khẩu cũ không đúng!");
+                success ? "Password changed successfully!" : "Incorrect current password!");
         return "redirect:/dashboard/change-password";
     }
 }
