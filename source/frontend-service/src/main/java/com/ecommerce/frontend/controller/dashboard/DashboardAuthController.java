@@ -18,7 +18,7 @@ import java.util.HashSet;
 
 @Controller
 @RequestMapping("/dashboard")
-public class AdminAuthController {
+public class DashboardAuthController {
 
     @Autowired
     private AuthApiService authApiService;

@@ -13,7 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/dashboard/orders")
-public class AdminOrderController {
+public class OrderController {
 
     @Autowired
     private OrderApiService orderApiService;

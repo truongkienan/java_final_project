@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/dashboard/products")
-public class AdminProductController {
+public class ProductController {
 
     @Autowired
     private CatalogApiService catalogApiService;

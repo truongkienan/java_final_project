@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/dashboard/users")
-public class AdminUserController {
+public class UserController {
 
     @Autowired
     private UserApiService userApiService;

@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/dashboard/categories")
-public class AdminCategoryController {
+public class CategoryController {
 
     @Autowired
     private CatalogApiService catalogApiService;

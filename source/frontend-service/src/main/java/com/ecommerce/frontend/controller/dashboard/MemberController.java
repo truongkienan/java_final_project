@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/dashboard/members")
-public class AdminMemberController {
+public class MemberController {
 
     @Autowired
     private CustomerApiService customerApiService;

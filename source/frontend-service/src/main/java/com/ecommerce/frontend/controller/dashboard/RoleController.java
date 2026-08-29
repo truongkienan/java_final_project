@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/dashboard/roles")
-public class AdminRoleController {
+public class RoleController {
 
     @Autowired
     private RoleApiService roleApiService;
