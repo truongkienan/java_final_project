@@ -53,14 +53,14 @@ public class AccountController {
         // giờ khách hàng không còn dòng trong users nữa nên bắt buộc phải đổi bên này.
         MemberDTO member = customerApiService.getMemberByUsername(username);
         if (member == null) {
-            redirectAttributes.addFlashAttribute("passwordError", "Không tìm thấy tài khoản!");
+            redirectAttributes.addFlashAttribute("passwordError", "Account not found!");
             return "redirect:/account";
         }
         boolean success = customerApiService.changeMemberPassword(member.getMemberId(), oldPassword, newPassword);
         if (success) {
-            redirectAttributes.addFlashAttribute("passwordMessage", "Đổi mật khẩu thành công!");
+            redirectAttributes.addFlashAttribute("passwordMessage", "Password changed successfully!");
         } else {
-            redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu cũ không đúng!");
+            redirectAttributes.addFlashAttribute("passwordError", "Old password is incorrect!");
         }
         return "redirect:/account";
     }
@@ -106,7 +106,7 @@ public class AccountController {
         }
         boolean success = orderApiService.cancelOrder(id);
         redirectAttributes.addFlashAttribute(success ? "orderMessage" : "orderError",
-                success ? "Đã hủy đơn hàng." : "Không thể hủy đơn hàng này.");
+                success ? "Order cancelled." : "Unable to cancel this order.");
         return "redirect:/account";
     }
 
@@ -125,7 +125,7 @@ public class AccountController {
         }
         boolean success = orderApiService.requestRefund(id);
         redirectAttributes.addFlashAttribute(success ? "orderMessage" : "orderError",
-                success ? "Đã gửi yêu cầu hoàn tiền, vui lòng chờ Admin duyệt." : "Không thể gửi yêu cầu hoàn tiền.");
+                success ? "Refund request submitted, please wait for Admin approval." : "Unable to submit refund request.");
         return "redirect:/account";
     }
 }

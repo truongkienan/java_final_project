@@ -29,7 +29,7 @@ public class HomeController {
 
         Map<String, List<ProductDTO>> productsByCategory = new LinkedHashMap<>();
         for (ProductDTO product : products) {
-            String categoryName = product.getCategory() != null ? product.getCategory().getCategoryName() : "Khác";
+            String categoryName = product.getCategory().getCategoryName();
             productsByCategory.computeIfAbsent(categoryName, k -> new ArrayList<>()).add(product);
         }
         model.addAttribute("productsByCategory", productsByCategory);
@@ -46,8 +46,7 @@ public class HomeController {
         model.addAttribute("product", product);
 
         List<ProductDTO> related = catalogApiService.getProducts().stream()
-                .filter(p -> !id.equals(p.getProductId()))
-                .filter(p -> product.getCategory() != null && p.getCategory() != null
+                .filter(p -> !id.equals(p.getProductId())
                         && product.getCategory().getCategoryId().equals(p.getCategory().getCategoryId()))
                 .toList();
         model.addAttribute("relatedProducts", related);

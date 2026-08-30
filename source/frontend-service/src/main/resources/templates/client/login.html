@@ -3,7 +3,7 @@
 	layout:decorate="~{client/_layout}">
 
 <head>
-	<title>Đăng nhập BigStore</title>
+	<title>Login - BigStore</title>
 </head>
 
 <body>
@@ -24,17 +24,17 @@
 					<form th:action="@{/login}" th:object="${loginRequest}" method="post">
 						<!-- Hiển thị lỗi nếu có -->
 						<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-						<div th:if="${param.registered}" class="alert alert-success" style="color: green;">Đăng ký thành
-							công, mời đăng nhập!</div>
+						<div th:if="${param.registered}" class="alert alert-success" style="color: green;">Registration
+							successful, please log in!</div>
 
 						<div class="key">
 							<i class="fa fa-user" aria-hidden="true"></i>
-							<input type="text" th:field="*{username}" placeholder="Tên đăng nhập" required="">
+							<input type="text" th:field="*{username}" placeholder="Username" required="">
 							<div class="clearfix"></div>
 						</div>
 						<div class="key">
 							<i class="fa fa-lock" aria-hidden="true"></i>
-							<input type="password" th:field="*{password}" placeholder="Mật khẩu" required="">
+							<input type="password" th:field="*{password}" placeholder="Password" required="">
 							<div class="clearfix"></div>
 						</div>
 						<input type="submit" value="Login">

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{dashboard/_layout}">
+
+<head>
+    <title>Unit Management - Admin</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <h1 class="mt-4">Units</h1>
+        <a th:href="@{/dashboard/units/new}" class="btn btn-primary mb-3">Add New Unit</a>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Units</li>
+        </ol>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table mr-1"></i> Unit List
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Unit Name</th>
+                            <th>Category</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="u : ${units}">
+                            <td th:text="${u.unitId}">1</td>
+                            <td th:text="${u.unitName}">Unit Name</td>
+                            <td th:text="${u.category != null ? u.category.categoryName : '—'}">Category</td>
+                            <td>
+                                <a th:href="@{/dashboard/units/edit/{id}(id=${u.unitId})}"
+                                   class="btn btn-sm btn-primary">Edit</a>
+                                <form th:action="@{/dashboard/units/delete/{id}(id=${u.unitId})}"
+                                      method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Are you sure you want to delete this unit?')">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

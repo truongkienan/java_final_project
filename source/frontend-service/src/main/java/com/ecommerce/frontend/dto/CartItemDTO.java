@@ -43,9 +43,18 @@ public class CartItemDTO {
 
     @JsonProperty("price")
     private Double price;
-    
+
     @JsonProperty("quantity")
     private Integer quantity;
 
-    // Cực kỳ quan trọng: Nhớ dùng Alt + Insert để sinh toàn bộ Getter và Setter ở đây nhé!
+    @JsonProperty("imageUrl")
+    private String imageUrl;
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }

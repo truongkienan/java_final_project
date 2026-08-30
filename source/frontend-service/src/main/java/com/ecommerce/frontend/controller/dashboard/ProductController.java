@@ -2,6 +2,7 @@ package com.ecommerce.frontend.controller.dashboard;
 
 import com.ecommerce.frontend.dto.CategoryDTO;
 import com.ecommerce.frontend.dto.ProductDTO;
+import com.ecommerce.frontend.dto.UnitDTO;
 import com.ecommerce.frontend.service.CatalogApiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,6 +31,7 @@ public class ProductController {
     public String createProductForm(Model model) {
         model.addAttribute("product", new ProductDTO());
         model.addAttribute("allCategories", catalogApiService.getAllCategories());
+        model.addAttribute("allUnits", catalogApiService.getUnits());
         return "dashboard/product-form";
     }
 
@@ -37,17 +39,24 @@ public class ProductController {
     public String editProductForm(@PathVariable("id") Integer id, Model model) {
         model.addAttribute("product", catalogApiService.getProductById(id));
         model.addAttribute("allCategories", catalogApiService.getAllCategories());
+        model.addAttribute("allUnits", catalogApiService.getUnits());
         return "dashboard/product-form";
     }
 
-    // Nhan categoryId rieng tu dropdown (khong dung nested @ModelAttribute binding
-    // de tranh phu thuoc co che "auto-grow nested path" ngam cua Spring), roi tu
-    // gan vao ProductDTO.category truoc khi goi sang catalog-service.
+    // Nhan categoryId/unitId rieng tu dropdown (khong dung nested @ModelAttribute
+    // binding de tranh phu thuoc co che "auto-grow nested path" ngam cua Spring),
+    // roi tu gan vao ProductDTO.category/unit truoc khi goi sang catalog-service.
     @PostMapping("/save")
-    public String saveProduct(@ModelAttribute ProductDTO productDTO, @RequestParam("categoryId") Short categoryId) {
+    public String saveProduct(@ModelAttribute ProductDTO productDTO, @RequestParam("categoryId") Short categoryId,
+                               @RequestParam("unitId") Short unitId) {
         CategoryDTO category = new CategoryDTO();
         category.setCategoryId(categoryId);
         productDTO.setCategory(category);
+
+        UnitDTO unit = new UnitDTO();
+        unit.setUnitId(unitId);
+        productDTO.setUnit(unit);
+
         catalogApiService.saveProduct(productDTO);
         return "redirect:/dashboard/products";
     }

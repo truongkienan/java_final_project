@@ -20,8 +20,8 @@
                     <!-- Nếu đã đăng nhập -->
                     <th:block th:if="${session.username != null}">
                         <li><a href="#"><i class="fa fa-user" aria-hidden="true"></i><span
-                                th:text="'Xin chào, ' + ${session.username}"></span></a></li>
-                        <li><a th:href="@{/logout}"><i class="fa fa-sign-out" aria-hidden="true"></i>Logout</a></li>
+                                th:text="'Hello, ' + ${session.username}"></span></a></li>
+                        <li><a href="#" onclick="syncCartAndLogout(); return false;"><i class="fa fa-sign-out" aria-hidden="true"></i>Logout</a></li>
                     </th:block>
 
                     <li><a th:href="@{/account}"><i class="fa fa-file-text-o" aria-hidden="true"></i>Order History</a></li>

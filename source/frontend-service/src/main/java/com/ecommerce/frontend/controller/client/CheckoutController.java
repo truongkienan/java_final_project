@@ -28,10 +28,12 @@ public class CheckoutController {
     // 1. Hiển thị trang checkout — lấy giỏ hàng từ Redis
     @GetMapping
     public String showCheckout(HttpSession session, Model model) {
-        String memberId = (String) session.getAttribute("memberId");
-        if (memberId == null) memberId = "guest";
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return "redirect:/login";
+        }
 
-        CartDTO cart = basketApiService.getBasket(memberId);
+        CartDTO cart = basketApiService.getBasket(username);
         if (cart == null || cart.getItems() == null || cart.getItems().isEmpty()) {
             return "redirect:/";
         }
@@ -52,15 +54,17 @@ public class CheckoutController {
     // Bước C: Nếu đủ hàng (PENDING) mới tạo PayPal order → redirect user sang PayPal
     @PostMapping("/pay")
     public String initiatePayment(HttpSession session) {
-        String memberId = (String) session.getAttribute("memberId");
-        if (memberId == null) return "redirect:/";
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return "redirect:/login";
+        }
 
-        CartDTO cart = basketApiService.getBasket(memberId);
+        CartDTO cart = basketApiService.getBasket(username);
         if (cart == null || cart.getItems() == null || cart.getItems().isEmpty()) {
             return "redirect:/";
         }
 
-        Map<String, Object> invoiceResult = orderApiService.createOrder(memberId, cart);
+        Map<String, Object> invoiceResult = orderApiService.createOrder(username, cart);
         if (invoiceResult == null || invoiceResult.get("id") == null) {
             return "redirect:/checkout?error=order_failed";
         }
@@ -107,15 +111,15 @@ public class CheckoutController {
         boolean success = paymentApiService.capturePaypalOrder(paypalOrderId);
 
         if (success) {
-            String memberId = (String) session.getAttribute("memberId");
-            if (memberId != null) {
-                basketApiService.deleteBasket(memberId);
+            String username = (String) session.getAttribute("username");
+            if (username != null) {
+                basketApiService.deleteBasket(username);
             }
-            model.addAttribute("message", "Đặt hàng thành công! Cảm ơn bạn đã mua hàng.");
+            model.addAttribute("message", "Order placed successfully! Thank you for your purchase.");
             return "client/order-success";
         }
 
-        model.addAttribute("message", "Có lỗi trong quá trình thanh toán. Vui lòng thử lại.");
+        model.addAttribute("message", "An error occurred during payment. Please try again.");
         return "client/order-cancel";
     }
 
@@ -126,7 +130,7 @@ public class CheckoutController {
         if (paypalOrderId != null) {
             paymentApiService.cancelPaypalOrder(paypalOrderId);
         }
-        model.addAttribute("message", "Bạn đã hủy thanh toán. Giỏ hàng vẫn được giữ nguyên.");
+        model.addAttribute("message", "You cancelled the payment. Your cart has been kept.");
         return "client/order-cancel";
     }
 }

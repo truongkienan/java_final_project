@@ -103,6 +103,65 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
     <!-- for bootstrap working -->
     <script th:src="@{/client/js/bootstrap.js}"></script>
     <!-- //for bootstrap working -->
+    <!-- Guard: sync localStorage cart with Redis on login / logout / account-switch -->
+    <script th:inline="javascript">
+        // Runs on every page load: keeps localStorage cart in sync with session identity
+        (function () {
+            var sessionUser = [[${session.username}]];
+            var cartOwner   = localStorage.getItem('cart_owner');
+
+            if (!sessionUser) {
+                // Logged out — clear localStorage only; Redis basket is preserved for next login
+                localStorage.removeItem('products');
+                localStorage.removeItem('cart_owner');
+            } else if (cartOwner !== sessionUser) {
+                // First login or account switch — restore cart from Redis
+                var serverCart = [[${sessionCart}]];
+                if (serverCart && serverCart.items && serverCart.items.length > 0) {
+                    var restoredProducts = serverCart.items.map(function (item) {
+                        return {
+                            id: item.productId,
+                            name: item.productName,
+                            price: item.price,
+                            quantity: item.quantity,
+                            image: item.imageUrl || '',
+                            summary: ''
+                        };
+                    });
+                    localStorage.setItem('products', JSON.stringify(restoredProducts));
+                } else {
+                    localStorage.removeItem('products');
+                }
+                localStorage.setItem('cart_owner', sessionUser);
+            }
+        })();
+
+        // Called by the Logout link: persist localStorage cart to Redis BEFORE clearing it,
+        // so the cart can be restored on the next login.
+        function syncCartAndLogout() {
+            try {
+                var productsStr = localStorage.getItem('products');
+                if (productsStr) {
+                    var products = JSON.parse(productsStr);
+                    if (products && products.length > 0) {
+                        var cartItems = products.map(function (p) {
+                            return { productId: p.id, productName: p.name,
+                                     price: p.price, quantity: p.quantity,
+                                     imageUrl: p.image };
+                        });
+                        // Synchronous XHR so the save completes before the page navigates away
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', '/api/cart/checkout', false);
+                        xhr.setRequestHeader('Content-Type', 'application/json');
+                        xhr.send(JSON.stringify({ items: cartItems }));
+                    }
+                }
+            } catch (e) {}
+            localStorage.removeItem('products');
+            localStorage.removeItem('cart_owner');
+            window.location.href = '/logout';
+        }
+    </script>
     <script type='text/javascript' th:src="@{/client/js/jquery.mycart.js}"></script>
     <script type="text/javascript">
         $(function () {
@@ -136,9 +195,9 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
                         });
                     });
 
-                    // 2. Gom vào gói CartDTO
+                    // 2. Gom vào gói CartDTO - memberId do server tu lay tu session dang
+                    // nhap, khong con gui tu client nua (server se tu choi neu chua dang nhap)
                     var cartData = {
-                        memberId: "user123", // Tạm thời hardcode ID người dùng (Sau này sẽ lấy từ Session/JWT)
                         items: cartItems
                     };
 
@@ -153,9 +212,14 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
                             // Chuyển hướng đến trang checkout
                             window.location.href = response;
                         },
-                        error: function (err) {
-                            alert('Có lỗi xảy ra khi đồng bộ giỏ hàng!');
-                            console.log(err);
+                        error: function (xhr) {
+                            if (xhr.status === 401) {
+                                alert('Please log in to check out.');
+                                window.location.href = '/login';
+                            } else {
+                                alert('An error occurred while syncing your cart!');
+                                console.log(xhr);
+                            }
                         }
                     });
                 },

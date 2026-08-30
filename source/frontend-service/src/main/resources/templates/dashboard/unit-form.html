@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{dashboard/_layout}">
+
+<head>
+    <title>Unit Form - Admin</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <h1 class="mt-4" th:text="${unit.unitId == null ? 'Add New Unit' : 'Update Unit'}">Form
+        </h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a th:href="@{/dashboard/units}">Unit List</a></li>
+            <li class="breadcrumb-item active">Form</li>
+        </ol>
+
+        <div class="card mb-4" style="max-width: 600px;">
+            <div class="card-body">
+                <form th:action="@{/dashboard/units/save}" th:object="${unit}" method="post">
+                    <input type="hidden" th:field="*{unitId}" />
+
+                    <div class="form-group">
+                        <label>Unit Name</label>
+                        <input type="text" class="form-control" th:field="*{unitName}" placeholder="e.g. Kg, Bottle, Pack" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select class="form-control" name="categoryId" required>
+                            <option value="">-- Select Category --</option>
+                            <option th:each="c : ${allCategories}" th:value="${c.categoryId}"
+                                    th:selected="${unit.category != null and unit.category.categoryId == c.categoryId}"
+                                    th:text="${c.categoryName}"></option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <a th:href="@{/dashboard/units}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

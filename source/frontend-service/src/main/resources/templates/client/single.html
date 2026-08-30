@@ -3,7 +3,7 @@
       layout:decorate="~{client/_layout}">
 
 <head>
-	<title th:text="${product.productName} + ' - BigStore'">Chi tiết sản phẩm - BigStore</title>
+	<title th:text="${product.productName} + ' - BigStore'">Product Detail - BigStore</title>
 </head>
 
 <body>
@@ -11,7 +11,7 @@
 	<!--banner-->
 	<div class="banner-top">
 		<div class="container">
-			<h3 th:text="${product.productName}">Tên sản phẩm</h3>
+			<h3 th:text="${product.productName}">Product Name</h3>
 			<h4><a th:href="@{/}">Home</a><label>/</label><span th:text="${product.productName}"></span></h4>
 			<div class="clearfix"> </div>
 		</div>
@@ -30,10 +30,16 @@
 				</div>
 				<div class="col-md-7 single-top-left ">
 					<div class="single-right">
-						<h3 th:text="${product.productName}">Tên sản phẩm</h3>
+						<h3 th:text="${product.productName}">Product Name</h3>
 
 						<div class="pr-single">
-							<p class="reduced">$<span th:text="${product.unitPrice}"></span></p>
+							<p class="reduced" th:if="${product.saleOfPrice != null and product.saleOfPrice.compareTo(product.unitPrice) != 0}">
+								<del><sup>VND</sup> <span th:text="${#numbers.formatDecimal(product.unitPrice, 0, 'COMMA', 0, 'POINT')}"></span></del>
+								<sup>VND</sup> <span th:text="${#numbers.formatDecimal(product.saleOfPrice, 0, 'COMMA', 0, 'POINT')}"></span>
+							</p>
+							<p class="reduced" th:unless="${product.saleOfPrice != null and product.saleOfPrice.compareTo(product.unitPrice) != 0}">
+								<sup>VND</sup> <span th:text="${#numbers.formatDecimal(product.unitPrice, 0, 'COMMA', 0, 'POINT')}"></span>
+							</p>
 						</div>
 						<div class="block block-w3">
 							<div class="starbox small ghosting"> </div>
@@ -42,7 +48,7 @@
 
 						<div class="add add-3">
 							<button class="btn btn-danger my-cart-btn my-cart-b" data-quantity="1"
-							        th:attr="data-id=${product.productId}, data-name=${product.productName}, data-price=${product.unitPrice}, data-image=@{/client/images/{img}(img=${product.imageUrl})}">
+							        th:attr="data-id=${product.productId}, data-name=${product.productName}, data-price=${product.saleOfPrice != null and product.saleOfPrice.compareTo(product.unitPrice) != 0 ? product.saleOfPrice : product.unitPrice}, data-image=@{/client/images/{img}(img=${product.imageUrl})}">
 								Add to Cart
 							</button>
 						</div>
@@ -58,7 +64,7 @@
 	<div class="content-top offer-w3agile">
 		<div class="container ">
 			<div class="spec ">
-				<h3>Sản phẩm khác</h3>
+				<h3>Related Products</h3>
 				<div class="ser-t">
 					<b></b>
 					<span><i></i></span>
@@ -78,7 +84,8 @@
 								       th:text="${p.productName}">Product</a></h6>
 							</div>
 							<div class="mid-2">
-								<p><em class="item_price" th:text="${p.unitPrice}"></em></p>
+								<p th:if="${p.saleOfPrice != null and p.saleOfPrice.compareTo(p.unitPrice) != 0}"><label><sup>VND</sup> <span th:text="${#numbers.formatDecimal(p.unitPrice, 0, 'COMMA', 0, 'POINT')}"></span></label><em class="item_price"><sup>VND</sup> <span th:text="${#numbers.formatDecimal(p.saleOfPrice, 0, 'COMMA', 0, 'POINT')}"></span></em></p>
+								<p th:unless="${p.saleOfPrice != null and p.saleOfPrice.compareTo(p.unitPrice) != 0}"><em class="item_price"><sup>VND</sup> <span th:text="${#numbers.formatDecimal(p.unitPrice, 0, 'COMMA', 0, 'POINT')}"></span></em></p>
 								<div class="block">
 									<div class="starbox small ghosting"> </div>
 								</div>
@@ -86,7 +93,7 @@
 							</div>
 							<div class="add">
 								<button class="btn btn-danger my-cart-btn my-cart-b" data-quantity="1"
-								        th:attr="data-id=${p.productId}, data-name=${p.productName}, data-price=${p.unitPrice}, data-image=@{/client/images/{img}(img=${p.imageUrl})}">
+								        th:attr="data-id=${p.productId}, data-name=${p.productName}, data-price=${p.saleOfPrice != null and p.saleOfPrice.compareTo(p.unitPrice) != 0 ? p.saleOfPrice : p.unitPrice}, data-image=@{/client/images/{img}(img=${p.imageUrl})}">
 									Add to Cart
 								</button>
 							</div>

@@ -10,7 +10,7 @@ public class ProductDTO {
     private BigDecimal saleOfPrice;
     private String imageUrl;
     private Short weight;
-    private String unit;
+    private UnitDTO unit;
     private String description;
     private String content;
 
@@ -70,11 +70,11 @@ public class ProductDTO {
         this.weight = weight;
     }
 
-    public String getUnit() {
+    public UnitDTO getUnit() {
         return unit;
     }
 
-    public void setUnit(String unit) {
+    public void setUnit(UnitDTO unit) {
         this.unit = unit;
     }
 

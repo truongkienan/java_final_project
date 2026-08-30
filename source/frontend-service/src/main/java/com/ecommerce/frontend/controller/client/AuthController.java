@@ -41,7 +41,7 @@ public class AuthController {
             session.setAttribute("role", auth.getRole());
             return "redirect:/"; // Về trang chủ sau khi đăng nhập thành công
         } else {
-            model.addAttribute("error", "Sai tên đăng nhập hoặc mật khẩu!");
+            model.addAttribute("error", "Invalid username or password!");
             return "client/login";
         }
     }
@@ -69,7 +69,6 @@ public class AuthController {
         session.removeAttribute("jwtToken");
         session.removeAttribute("username");
         session.removeAttribute("role");
-        session.removeAttribute("memberId");
         return "redirect:/";
     }
 }

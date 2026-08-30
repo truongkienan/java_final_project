@@ -49,7 +49,12 @@
                         </div>
                         <div class="form-group">
                             <label>Unit</label>
-                            <input type="text" class="form-control" th:field="*{unit}" placeholder="e.g. Kg, Chai, Gói" />
+                            <select class="form-control" name="unitId" required>
+                                <option value="">-- Select Unit --</option>
+                                <option th:each="u : ${allUnits}" th:value="${u.unitId}"
+                                        th:selected="${product.unit != null and product.unit.unitId == u.unitId}"
+                                        th:text="${u.unitName + ' (' + (u.category != null ? u.category.categoryName : '—') + ')'}"></option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label>Description</label>

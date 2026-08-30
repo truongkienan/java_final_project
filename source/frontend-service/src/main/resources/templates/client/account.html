@@ -3,7 +3,7 @@
       layout:decorate="~{client/_layout}">
 
 <head>
-    <title>Tài khoản của tôi - BigStore</title>
+    <title>My Account - BigStore</title>
 </head>
 
 <body>
@@ -11,8 +11,8 @@
     <!--banner-->
     <div class="banner-top">
         <div class="container">
-            <h3>Tài khoản của tôi</h3>
-            <h4><a th:href="@{/}">Home</a><label>/</label>Tài khoản</h4>
+            <h3>My Account</h3>
+            <h4><a th:href="@{/}">Home</a><label>/</label>Account</h4>
             <div class="clearfix"> </div>
         </div>
     </div>
@@ -20,26 +20,26 @@
     <div class="login">
         <div class="main-agileits" style="width:90%; max-width:1100px;">
             <div class="form-w3agile form-w3agile1">
-                <h3>Xin chào, <span th:text="${username}"></span></h3>
+                <h3>Hello, <span th:text="${username}"></span></h3>
 
-                <h4 style="margin-top:30px;">Lịch sử đơn hàng</h4>
+                <h4 style="margin-top:30px;">Order History</h4>
 
                 <div th:if="${orderMessage}" class="alert alert-success" style="color: green;" th:text="${orderMessage}"></div>
                 <div th:if="${orderError}" class="alert alert-danger" th:text="${orderError}"></div>
 
                 <div th:if="${orders.isEmpty()}">
-                    <p>Bạn chưa có đơn hàng nào.</p>
+                    <p>You have no orders yet.</p>
                 </div>
 
                 <table th:unless="${orders.isEmpty()}" class="table" style="width:100%; color:#333; margin-top:15px;">
                     <thead>
                     <tr>
-                        <th>Mã đơn hàng</th>
-                        <th>Ngày đặt</th>
-                        <th>Số sản phẩm</th>
-                        <th>Tổng tiền</th>
-                        <th>Trạng thái</th>
-                        <th>Hành động</th>
+                        <th>Order ID</th>
+                        <th>Order Date</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -47,32 +47,32 @@
                         <td th:text="${#strings.substring(order.id, 0, 8)}"></td>
                         <td th:text="${#strings.substring(order.orderDate, 0, 10)}"></td>
                         <td th:text="${order.details.size()}"></td>
-                        <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}"></td>
+                        <td><sup>VND</sup> <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}"></span></td>
                         <td th:text="${order.status}"></td>
                         <td>
                             <form th:if="${order.status == 'PENDING'}" th:action="@{/account/orders/{id}/cancel(id=${order.id})}" method="post" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Hủy đơn hàng này?')">Hủy đơn hàng</button>
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Cancel this order?')">Cancel Order</button>
                             </form>
                             <form th:if="${order.status == 'PAID'}" th:action="@{/account/orders/{id}/request-refund(id=${order.id})}" method="post" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Gửi yêu cầu hoàn tiền cho đơn này?')">Yêu cầu hoàn tiền</button>
+                                <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Request a refund for this order?')">Request Refund</button>
                             </form>
-                            <span th:if="${order.status == 'REFUND_REQUESTED'}" style="font-style:italic; color:#888;">Đang chờ duyệt hoàn tiền</span>
+                            <span th:if="${order.status == 'REFUND_REQUESTED'}" style="font-style:italic; color:#888;">Refund pending approval</span>
                         </td>
                     </tr>
                     </tbody>
                 </table>
 
-                <h4 style="margin-top:30px;">Sổ địa chỉ giao hàng</h4>
+                <h4 style="margin-top:30px;">Shipping Addresses</h4>
 
                 <div th:if="${addresses.isEmpty()}">
-                    <p>Bạn chưa lưu địa chỉ nào.</p>
+                    <p>You haven't saved any addresses yet.</p>
                 </div>
 
                 <table th:unless="${addresses.isEmpty()}" class="table" style="width:100%; color:#333; margin-top:15px;">
                     <thead>
                     <tr>
-                        <th>Địa chỉ</th>
-                        <th>Số điện thoại</th>
+                        <th>Address</th>
+                        <th>Phone Number</th>
                         <th></th>
                     </tr>
                     </thead>
@@ -83,7 +83,7 @@
                         <td>
                             <form th:action="@{/account/addresses/delete/{id}(id=${addr.addressId})}" method="post" style="display:inline;">
                                 <button type="submit" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('Xóa địa chỉ này?')">Xóa</button>
+                                        onclick="return confirm('Delete this address?')">Delete</button>
                             </form>
                         </td>
                     </tr>
@@ -93,18 +93,18 @@
                 <form th:action="@{/account/addresses/add}" method="post" style="max-width:400px; margin-top:15px;">
                     <div class="key">
                         <i class="fa fa-map-marker" aria-hidden="true"></i>
-                        <input type="text" name="addressName" placeholder="Địa chỉ chi tiết" required="">
+                        <input type="text" name="addressName" placeholder="Detailed address" required="">
                         <div class="clearfix"></div>
                     </div>
                     <div class="key">
                         <i class="fa fa-phone" aria-hidden="true"></i>
-                        <input type="text" name="phone" placeholder="Số điện thoại" required="">
+                        <input type="text" name="phone" placeholder="Phone number" required="">
                         <div class="clearfix"></div>
                     </div>
-                    <input type="submit" value="Thêm địa chỉ">
+                    <input type="submit" value="Add Address">
                 </form>
 
-                <h4 style="margin-top:30px;">Đổi mật khẩu</h4>
+                <h4 style="margin-top:30px;">Change Password</h4>
 
                 <div th:if="${passwordMessage}" class="alert alert-success" style="color: green;" th:text="${passwordMessage}"></div>
                 <div th:if="${passwordError}" class="alert alert-danger" th:text="${passwordError}"></div>
@@ -112,15 +112,15 @@
                 <form th:action="@{/account/change-password}" method="post" style="max-width:400px; margin-top:15px;">
                     <div class="key">
                         <i class="fa fa-lock" aria-hidden="true"></i>
-                        <input type="password" name="oldPassword" placeholder="Mật khẩu hiện tại" required="">
+                        <input type="password" name="oldPassword" placeholder="Current password" required="">
                         <div class="clearfix"></div>
                     </div>
                     <div class="key">
                         <i class="fa fa-lock" aria-hidden="true"></i>
-                        <input type="password" name="newPassword" placeholder="Mật khẩu mới" required="">
+                        <input type="password" name="newPassword" placeholder="New password" required="">
                         <div class="clearfix"></div>
                     </div>
-                    <input type="submit" value="Đổi mật khẩu">
+                    <input type="submit" value="Change Password">
                 </form>
             </div>
         </div>

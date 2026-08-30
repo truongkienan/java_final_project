@@ -1,6 +1,7 @@
 package com.ecommerce.frontend.service;
 
 import com.ecommerce.frontend.dto.ProductDTO;
+import com.ecommerce.frontend.dto.UnitDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +25,9 @@ public class CatalogApiService {
 
     @org.springframework.beans.factory.annotation.Value("${CATEGORY_SERVICE_URL:http://localhost:8081/api/categories}")
     private String categoryServiceUrl;
+
+    @org.springframework.beans.factory.annotation.Value("${UNIT_SERVICE_URL:http://localhost:8081/api/units}")
+    private String unitServiceUrl;
 
     public List<ProductDTO> getProducts() {
         try {
@@ -107,6 +111,35 @@ public class CatalogApiService {
 
     public void deleteProduct(Integer id) {
         restTemplate.delete(catalogServiceUrl + "/" + id);
+    }
+
+    public List<UnitDTO> getUnits() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", "application/json");
+        HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
+        ResponseEntity<UnitDTO[]> response = restTemplate.exchange(
+                unitServiceUrl,
+                HttpMethod.GET,
+                requestEntity,
+                UnitDTO[].class);
+        UnitDTO[] units = response.getBody();
+        return units != null ? Arrays.asList(units) : Arrays.asList();
+    }
+
+    public UnitDTO getUnitById(Short id) {
+        return restTemplate.getForObject(unitServiceUrl + "/" + id, UnitDTO.class);
+    }
+
+    public void saveUnit(UnitDTO unitDTO) {
+        if (unitDTO.getUnitId() == null) {
+            restTemplate.postForObject(unitServiceUrl, unitDTO, UnitDTO.class);
+        } else {
+            restTemplate.put(unitServiceUrl + "/" + unitDTO.getUnitId(), unitDTO);
+        }
+    }
+
+    public void deleteUnit(Short id) {
+        restTemplate.delete(unitServiceUrl + "/" + id);
     }
 
 }

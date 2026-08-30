@@ -29,6 +29,8 @@
                                     <th>Product Name</th>
                                     <th>Image</th>
                                     <th>Price</th>
+                                    <th>Sale Price</th>
+                                    <th>Unit</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -41,7 +43,14 @@
                                             th:src="@{/client/images/{img}(img=${product.imageUrl})}"
                                             style="width: 50px; height: 50px; object-fit: cover;" />
                                     </td>
-                                    <td th:text="${product.unitPrice}">100,000</td>
+                                    <td><span th:text="${#numbers.formatDecimal(product.unitPrice, 0, 'COMMA', 0, 'POINT')}"></span> <sup>VND</sup></td>
+                                    <td>
+                                        <span th:if="${product.saleOfPrice != null}"
+                                              th:text="${#numbers.formatDecimal(product.saleOfPrice, 0, 'COMMA', 0, 'POINT')}"></span>
+                                        <sup th:if="${product.saleOfPrice != null}">VND</sup>
+                                        <span th:unless="${product.saleOfPrice != null}">—</span>
+                                    </td>
+                                    <td th:text="${product.unit != null ? product.unit.unitName : '—'}">Kg</td>
                                     <td>
                                         <a th:href="@{/dashboard/products/edit/{id}(id=${product.productId})}"
                                             class="btn btn-sm btn-primary">Edit</a>
