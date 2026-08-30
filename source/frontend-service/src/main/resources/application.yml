@@ -11,3 +11,11 @@ spring:
     name: frontend-service
   thymeleaf:
     cache: false # Tắt cache để dev dễ dàng cập nhật giao diện
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+app:
+  upload:
+    dir: ./uploads

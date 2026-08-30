@@ -1,6 +1,5 @@
 package com.ecommerce.frontend.controller.client;
 
-import com.ecommerce.frontend.dto.CategoryDTO;
 import com.ecommerce.frontend.dto.ProductDTO;
 import com.ecommerce.frontend.service.CatalogApiService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/")
@@ -37,12 +35,11 @@ public class HomeController {
 
         // 5. Nhóm sản phẩm theo tên Danh mục (chỉ những danh mục thực sự có sản phẩm)
         // để vẽ khối tab "Special Offers" theo category ở đầu trang chủ.
-        Map<Short, String> categoryNameById = catalogApiService.getAllCategories().stream()
-                .collect(Collectors.toMap(CategoryDTO::getCategoryId, CategoryDTO::getCategoryName));
-
+        // Category giờ đi kèm sẵn trong mỗi ProductDTO (quan hệ @ManyToOne bên catalog-service),
+        // không cần gọi riêng API /api/categories rồi tự dựng map như trước nữa.
         Map<String, List<ProductDTO>> productsByCategory = new LinkedHashMap<>();
         for (ProductDTO product : products) {
-            String categoryName = categoryNameById.getOrDefault(product.getCategoryId(), "Khác");
+            String categoryName = product.getCategory() != null ? product.getCategory().getCategoryName() : "Khác";
             productsByCategory.computeIfAbsent(categoryName, k -> new ArrayList<>()).add(product);
         }
         model.addAttribute("productsByCategory", productsByCategory);
@@ -62,7 +59,8 @@ public class HomeController {
         // Danh sách sản phẩm khác cùng category để gợi ý (loại trừ chính sản phẩm đang xem)
         List<ProductDTO> related = catalogApiService.getAllProducts().stream()
                 .filter(p -> !id.equals(p.getProductId()))
-                .filter(p -> product.getCategoryId() != null && product.getCategoryId().equals(p.getCategoryId()))
+                .filter(p -> product.getCategory() != null && p.getCategory() != null
+                        && product.getCategory().getCategoryId().equals(p.getCategory().getCategoryId()))
                 .toList();
         model.addAttribute("relatedProducts", related);
 

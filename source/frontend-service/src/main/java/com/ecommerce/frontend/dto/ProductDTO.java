@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public class ProductDTO {
     private Integer productId;
-    private Short categoryId;
+    private CategoryDTO category;
     private String productName;
     private BigDecimal unitPrice;
     private BigDecimal saleOfPrice;
@@ -20,12 +20,12 @@ public class ProductDTO {
         this.productId = productId;
     }
 
-    public Short getCategoryId() {
-        return categoryId;
+    public CategoryDTO getCategory() {
+        return category;
     }
 
-    public void setCategoryId(Short categoryId) {
-        this.categoryId = categoryId;
+    public void setCategory(CategoryDTO category) {
+        this.category = category;
     }
 
     public String getProductName() {

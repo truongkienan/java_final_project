@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Integer> {
-    // Custom query: Tìm toàn bộ sản phẩm dựa trên Id danh mục
-    List<Product> findByCategoryId(Short categoryId);
+    // Custom query: Tìm toàn bộ sản phẩm dựa trên Id danh mục (truy vấn xuyên quan hệ category)
+    List<Product> findByCategory_CategoryId(Short categoryId);
 }

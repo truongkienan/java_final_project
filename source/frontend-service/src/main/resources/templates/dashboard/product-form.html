@@ -4,6 +4,7 @@
 
 <head>
     <title>Product Form - Admin</title>
+    <link href="https://releases.transloadit.com/uppy/v5.2.1/uppy.min.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -26,12 +27,26 @@
                             <input type="text" class="form-control" th:field="*{productName}" required />
                         </div>
                         <div class="form-group">
+                            <label>Category</label>
+                            <select class="form-control" name="categoryId" required>
+                                <option value="">-- Select Category --</option>
+                                <option th:each="c : ${allCategories}" th:value="${c.categoryId}"
+                                        th:selected="${product.category != null and product.category.categoryId == c.categoryId}"
+                                        th:text="${c.categoryName}"></option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label>Price (VND)</label>
                             <input type="number" step="1000" class="form-control" th:field="*{unitPrice}" />
                         </div>
                         <div class="form-group">
-                            <label>Image URL</label>
-                            <input type="text" class="form-control" th:field="*{imageUrl}" />
+                            <label>Image</label>
+                            <div class="d-flex align-items-center" style="gap: 12px;">
+                                <img id="imagePreview" src="" alt="Product image"
+                                     style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; display: none;" />
+                                <button type="button" class="btn btn-secondary" id="chooseImageBtn">Choose image</button>
+                            </div>
+                            <input type="hidden" th:field="*{imageUrl}" id="imageUrlInput" />
                         </div>
 
                         <button type="submit" class="btn btn-success">Save</button>
@@ -40,7 +55,150 @@
                 </div>
             </div>
         </div>
+
+        <div class="modal fade" id="imagePickerModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Select product image</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-toggle="tab" href="#uploadTab" role="tab">Upload new</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#chooseTab" role="tab" id="chooseTabLink">Choose existing</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content pt-3">
+                            <div class="tab-pane fade show active" id="uploadTab" role="tabpanel">
+                                <div id="uppyContainer"></div>
+                            </div>
+                            <div class="tab-pane fade" id="chooseTab" role="tabpanel">
+                                <input type="text" class="form-control mb-2" id="imageSearchInput"
+                                       placeholder="Search by file name..." />
+                                <div id="imageGrid" style="display:flex; flex-wrap:wrap; align-content:flex-start; gap:10px; height:400px; overflow-y:auto;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <th:block layout:fragment="scripts">
+    <script th:inline="none">
+        $(function () {
+            var basePath = '/client/images/';
+
+            var currentImage = $('#imageUrlInput').val();
+            if (currentImage) {
+                $('#imagePreview').attr('src', basePath + currentImage).show();
+            }
+
+            // Global vi script khoi tao Uppy (type="module" o duoi) can goi ham nay
+            // sau khi upload xong; jQuery script nay va module script la 2 scope rieng.
+            window.selectImage = function (fileName) {
+                $('#imageUrlInput').val(fileName);
+                $('#imagePreview').attr('src', basePath + fileName).show();
+                $('#imagePickerModal').modal('hide');
+            };
+
+            $('#chooseImageBtn').on('click', function () {
+                $('#imagePickerModal').modal('show');
+            });
+
+            // Phan trang + tim kiem cho tab "Choose existing": tai 40 anh moi nhat
+            // truoc, cuon toi gan cuoi grid moi tai tiep, tranh load toan bo thu muc
+            // uploads/ 1 luc khi so anh da nhieu.
+            var PAGE_SIZE = 40;
+            var pagingState = { offset: 0, search: '', hasMore: true, loading: false };
+
+            function loadMoreImages() {
+                if (pagingState.loading || !pagingState.hasMore) {
+                    return;
+                }
+                pagingState.loading = true;
+                $.get('/dashboard/upload/images', {
+                    offset: pagingState.offset,
+                    limit: PAGE_SIZE,
+                    search: pagingState.search
+                }, function (res) {
+                    var grid = $('#imageGrid');
+                    if (pagingState.offset === 0 && res.images.length === 0) {
+                        grid.append('<p class="text-muted">' +
+                            (pagingState.search ? 'No images match your search.' : 'No uploaded images yet.') +
+                            '</p>');
+                    }
+                    res.images.forEach(function (fileName) {
+                        var thumb = $('<img>')
+                            .attr('src', basePath + fileName)
+                            .css({ width: '90px', height: '90px', objectFit: 'cover', cursor: 'pointer', border: '1px solid #ddd', borderRadius: '4px' })
+                            .on('click', function () { selectImage(fileName); });
+                        grid.append(thumb);
+                    });
+                    pagingState.offset += res.images.length;
+                    pagingState.hasMore = res.hasMore;
+                    pagingState.loading = false;
+                });
+            }
+
+            function resetAndLoadImages(search) {
+                pagingState = { offset: 0, search: search || '', hasMore: true, loading: false };
+                $('#imageGrid').empty();
+                loadMoreImages();
+            }
+
+            var searchDebounceTimer;
+            $('#imageSearchInput').on('input', function () {
+                var value = $(this).val();
+                clearTimeout(searchDebounceTimer);
+                searchDebounceTimer = setTimeout(function () { resetAndLoadImages(value); }, 300);
+            });
+
+            $('#imageGrid').on('scroll', function () {
+                var el = this;
+                if (el.scrollTop + el.clientHeight >= el.scrollHeight - 50) {
+                    loadMoreImages();
+                }
+            });
+
+            $('#chooseTabLink').on('click', function () {
+                $('#imageSearchInput').val('');
+                resetAndLoadImages('');
+            });
+        });
+    </script>
+    <script type="module" th:inline="none">
+        import { Uppy, Dashboard, XHRUpload } from 'https://releases.transloadit.com/uppy/v5.2.1/uppy.min.mjs';
+
+        const uppy = new Uppy({
+            restrictions: {
+                allowedFileTypes: ['image/*'],
+                maxFileSize: 5 * 1024 * 1024,
+                maxNumberOfFiles: 1
+            }
+        })
+            .use(Dashboard, { target: '#uppyContainer', inline: true, height: 300 })
+            .use(XHRUpload, { endpoint: '/dashboard/upload/image', fieldName: 'file' });
+
+        uppy.on('upload-success', function (file, response) {
+            window.selectImage(response.body.fileName);
+        });
+
+        // Don xong moi lan modal mo lai (khong don ngay trong upload-success vi lam
+        // gian doan vong doi upload cua Uppy, khien no bao "Upload failed" gia sau khi
+        // file that ra da upload thanh cong).
+        $('#imagePickerModal').on('show.bs.modal', function () {
+            uppy.clear();
+        });
+    </script>
+    </th:block>
 </body>
 
 </html>

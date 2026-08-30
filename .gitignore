@@ -17,6 +17,9 @@ target/
 source/.pids
 source/logs/
 
+# Anh upload tu chuc nang Image Picker (du lieu runtime, khong phai code)
+source/frontend-service/uploads/
+
 # 2 git repo độc lập không liên quan, nằm lẫn trong thư mục này
 /WebAPI401/
 /WebApp401/
