@@ -9,8 +9,10 @@ public class ProductDTO {
     private BigDecimal unitPrice;
     private BigDecimal saleOfPrice;
     private String imageUrl;
+    private Short weight;
     private String unit;
     private String description;
+    private String content;
 
     public Integer getProductId() {
         return productId;
@@ -60,6 +62,14 @@ public class ProductDTO {
         this.imageUrl = imageUrl;
     }
 
+    public Short getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Short weight) {
+        this.weight = weight;
+    }
+
     public String getUnit() {
         return unit;
     }
@@ -74,5 +84,13 @@ public class ProductDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 }

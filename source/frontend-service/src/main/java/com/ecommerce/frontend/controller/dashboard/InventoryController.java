@@ -30,7 +30,7 @@ public class InventoryController {
     // ton kho tu inventory-service (san pham chua co dong ton kho thi mac dinh hien 0)
     @GetMapping
     public String manageInventory(Model model) {
-        List<ProductDTO> products = catalogApiService.getAllProducts();
+        List<ProductDTO> products = catalogApiService.getProducts();
         List<StockDTO> stocks = inventoryApiService.getAllStocks();
         Map<String, Integer> quantityByProduct = stocks.stream()
                 .collect(Collectors.toMap(StockDTO::getProductId, StockDTO::getQuantity, (a, b) -> a));

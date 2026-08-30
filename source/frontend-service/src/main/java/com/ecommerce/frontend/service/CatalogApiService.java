@@ -19,16 +19,13 @@ public class CatalogApiService {
     @Autowired
     private RestTemplate restTemplate;
 
-    // Giả sử API Catalog đang chạy ở port 8081.
-    // (Lưu ý: Nếu frontend của bạn cũng đang ở 8081, bạn cần đổi frontend sang 8083
-    // trong application.yml nhé!)
     @org.springframework.beans.factory.annotation.Value("${CATALOG_SERVICE_URL:http://localhost:8081/api/products}")
     private String catalogServiceUrl;
 
     @org.springframework.beans.factory.annotation.Value("${CATEGORY_SERVICE_URL:http://localhost:8081/api/categories}")
     private String categoryServiceUrl;
 
-    public List<ProductDTO> getAllProducts() {
+    public List<ProductDTO> getProducts() {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.set("Accept", "application/json");
@@ -45,11 +42,10 @@ public class CatalogApiService {
             return products != null ? Arrays.asList(products) : Arrays.asList();
         } catch (org.springframework.web.client.RestClientException e) {
             System.err.println("Lỗi kết nối Catalog Service: " + e.getMessage());
-            return Arrays.asList(); // Trả về list rỗng thay vì crash
+            return Arrays.asList();
         }
     }
 
-    // Hàm gọi API lấy danh sách Categories
     public List<com.ecommerce.frontend.dto.CategoryDTO> getAllCategories() {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", "application/json");
@@ -63,8 +59,6 @@ public class CatalogApiService {
         return categories != null ? Arrays.asList(categories) : Arrays.asList();
     }
 
-    // Hàm lấy cây danh mục 2 cấp (dùng cho navbar Client) — không throw lỗi ra ngoài
-    // vì header dùng chung mọi trang, nếu catalog-service lỗi thì trả list rỗng thay vì sập cả trang.
     public List<CategoryDTO> getCategoryTree() {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -83,18 +77,14 @@ public class CatalogApiService {
         }
     }
 
-    // 1. Hàm lấy chi tiết một Category theo ID
     public CategoryDTO getCategoryById(Short id) {
         return restTemplate.getForObject(categoryServiceUrl + "/" + id, CategoryDTO.class);
     }
 
-    // 2. Hàm Lưu Category (Upsert: Tự động phân biệt Thêm hay Sửa)
     public void saveCategory(CategoryDTO categoryDTO) {
         if (categoryDTO.getCategoryId() == null) {
-            // Nếu không có ID -> Gọi POST để Thêm mới
             restTemplate.postForObject(categoryServiceUrl, categoryDTO, CategoryDTO.class);
         } else {
-            // Nếu có ID -> Gọi PUT để Cập nhật
             restTemplate.put(categoryServiceUrl + "/" + categoryDTO.getCategoryId(), categoryDTO);
         }
     }

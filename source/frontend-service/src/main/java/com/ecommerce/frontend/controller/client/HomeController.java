@@ -18,25 +18,15 @@ import java.util.Map;
 @RequestMapping("/")
 public class HomeController {
 
-    // 1. Nhúng Service gọi API vào Controller
     @Autowired
     private CatalogApiService catalogApiService;
 
-    // 2. Thêm đối tượng Model của Spring vào tham số hàm
     @GetMapping
     public String index(Model model) {
 
-        // 3. Gọi Service để lấy danh sách sản phẩm thực tế từ Backend
-        List<ProductDTO> products = catalogApiService.getAllProducts();
-
-        // 4. Đóng gói danh sách sản phẩm vào một cái biến tên là "products"
-        // Thymeleaf sẽ bắt lấy biến này để vẽ ra HTML
+        List<ProductDTO> products = catalogApiService.getProducts();
         model.addAttribute("products", products);
 
-        // 5. Nhóm sản phẩm theo tên Danh mục (chỉ những danh mục thực sự có sản phẩm)
-        // để vẽ khối tab "Special Offers" theo category ở đầu trang chủ.
-        // Category giờ đi kèm sẵn trong mỗi ProductDTO (quan hệ @ManyToOne bên catalog-service),
-        // không cần gọi riêng API /api/categories rồi tự dựng map như trước nữa.
         Map<String, List<ProductDTO>> productsByCategory = new LinkedHashMap<>();
         for (ProductDTO product : products) {
             String categoryName = product.getCategory() != null ? product.getCategory().getCategoryName() : "Khác";
@@ -47,7 +37,6 @@ public class HomeController {
         return "client/index";
     }
 
-    // Trang chi tiết 1 sản phẩm
     @GetMapping("/product/{id}")
     public String productDetail(@PathVariable("id") Integer id, Model model) {
         ProductDTO product = catalogApiService.getProductById(id);
@@ -56,8 +45,7 @@ public class HomeController {
         }
         model.addAttribute("product", product);
 
-        // Danh sách sản phẩm khác cùng category để gợi ý (loại trừ chính sản phẩm đang xem)
-        List<ProductDTO> related = catalogApiService.getAllProducts().stream()
+        List<ProductDTO> related = catalogApiService.getProducts().stream()
                 .filter(p -> !id.equals(p.getProductId()))
                 .filter(p -> product.getCategory() != null && p.getCategory() != null
                         && product.getCategory().getCategoryId().equals(p.getCategory().getCategoryId()))

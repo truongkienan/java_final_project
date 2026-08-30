@@ -22,7 +22,7 @@ public class ProductController {
 
     @GetMapping
     public String manageProducts(Model model) {
-        model.addAttribute("products", catalogApiService.getAllProducts());
+        model.addAttribute("products", catalogApiService.getProducts());
         return "dashboard/products";
     }
 
