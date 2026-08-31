@@ -7,12 +7,27 @@ import com.ecommerce.order.repository.InvoiceRepository;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * SUBSCRIBER (bên nhận).
+ *
+ * Cơ chế giao tiếp: annotation @RabbitListener(queues = ...) báo cho Spring "hãy đứng canh Queue
+ * này bằng 1 luồng nền (background thread), hễ có message rơi vào thì tự động gọi method bên
+ * dưới". Method này KHÔNG được code nào trong project gọi trực tiếp - nó chỉ được kích hoạt khi
+ * payment-service publish message thật sự tới Queue QUEUE_PAYMENT_SUCCESS.
+ *
+ * payment-service (nơi publish) hoàn toàn không biết class này tồn tại - nó chỉ biết "gửi vào
+ * exchange ecommerce.exchange kèm routing key payment.success". Việc message đó được chuyển tới
+ * đúng Queue này là do Binding (bindingPaymentSuccess trong order-service/RabbitMQConfig) quyết
+ * định. Đây chính là điểm khác biệt với gọi hàm/API trực tiếp: 2 bên hoàn toàn không tham chiếu
+ * tới nhau, chỉ cùng "thoả thuận ngầm" về tên routing key.
+ */
 @Service
 public class PaymentEventListener {
 
@@ -25,6 +40,11 @@ public class PaymentEventListener {
     // Các trạng thái mà khi đơn chuyển sang, kho đã trừ trước đó cần được hoàn lại (compensating transaction)
     private static final Set<String> STATUSES_REQUIRE_STOCK_RESTORE = Set.of("CANCELLED", "FAILED", "REFUNDED");
 
+    // @Transactional: giữ Hibernate session mở xuyên suốt method - bắt buộc phải có vì
+    // đây là @RabbitListener (thread nền), không phải HTTP request nên không được Spring Boot's
+    // Open-Session-In-View bảo vệ. Thiếu annotation này, invoice.getDetails() (@OneToMany LAZY)
+    // trong toStockEvent() sẽ ném LazyInitializationException khi publishInventoryRestore() gọi tới.
+    @Transactional
     @RabbitListener(queues = RabbitMQConfig.QUEUE_PAYMENT_SUCCESS)
     public void handlePaymentSuccess(Map<String, String> event) {
         String orderIdStr = event.get("orderId");

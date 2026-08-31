@@ -120,4 +120,15 @@ public class OrderApiService {
             return null;
         }
     }
+
+    // Admin xóa hẳn đơn hàng khỏi hệ thống - xóa cứng (không khôi phục được).
+    public boolean deleteOrder(String orderId) {
+        try {
+            restTemplate.exchange(orderServiceUrl + "/" + orderId, HttpMethod.DELETE, HttpEntity.EMPTY, Void.class);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Lỗi xóa đơn hàng: " + e.getMessage());
+            return false;
+        }
+    }
 }

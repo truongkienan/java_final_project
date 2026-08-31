@@ -32,6 +32,7 @@ public class CatalogGrpcServiceImpl extends CatalogGrpcServiceGrpc.CatalogGrpcSe
                         .setProductId(productIdStr)
                         .setPrice(finalPrice)
                         .setExists(true)
+                        .setProductName(p.getProductName() != null ? p.getProductName() : "")
                         .build();
 
                 // Gửi câu trả lời về cho Client

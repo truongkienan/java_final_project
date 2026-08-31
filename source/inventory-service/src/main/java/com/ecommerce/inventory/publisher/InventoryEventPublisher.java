@@ -7,6 +7,15 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * PUBLISHER (bên gửi).
+ *
+ * inventory-service dùng class này để "báo cáo kết quả" ngược lại cho order-service sau khi xử lý
+ * xong yêu cầu trừ/hoàn kho - nhưng vẫn qua cơ chế publish bất đồng bộ, KHÔNG phải gọi API trực
+ * tiếp về order-service. rabbitTemplate.convertAndSend gửi vào exchange ecommerce.exchange với
+ * routing key "inventory.result" rồi kết thúc ngay; inventory-service không biết order-service có
+ * đang lắng nghe hay không, không chờ phản hồi.
+ */
 @Service
 public class InventoryEventPublisher {
 

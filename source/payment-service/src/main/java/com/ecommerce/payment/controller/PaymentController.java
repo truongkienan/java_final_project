@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -36,7 +37,22 @@ public class PaymentController {
             return ResponseEntity.ok(Map.of("status", "COMPLETED", "paypalOrderId", orderId));
         }
         paymentEventPublisher.publishPaymentStatus(payment.getInvoiceId(), "FAILED");
-        return ResponseEntity.badRequest().body(Map.of("error", "Thanh toán thất bại"));
+        // HashMap (không phải Map.of) vì failureReason có thể null khi PayPal không trả chi tiết lỗi.
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("error", "Thanh toán thất bại");
+        errorBody.put("reason", payment.getFailureReason());
+        return ResponseEntity.badRequest().body(errorBody);
+    }
+
+    // Lấy thông tin thanh toán (bao gồm lý do thất bại nếu có) theo invoiceId - dùng cho trang
+    // chi tiết đơn hàng bên dashboard.
+    @GetMapping("/invoice/{invoiceId}")
+    public ResponseEntity<?> getPaymentByInvoice(@PathVariable("invoiceId") String invoiceId) {
+        Payment payment = payPalService.getPaymentByInvoiceId(invoiceId);
+        if (payment == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(payment);
     }
 
     @PostMapping("/orders/{orderId}/cancel")

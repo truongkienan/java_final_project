@@ -11,6 +11,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * SUBSCRIBER (bên nhận).
+ *
+ * Cơ chế giao tiếp: giống PaymentEventListener - @RabbitListener khiến Spring tự canh Queue
+ * QUEUE_INVENTORY_RESULT bằng 1 luồng nền, tự gọi method này mỗi khi có message tới. Message này
+ * do inventory-service publish (routing key "inventory.result") sau khi xử lý xong yêu cầu trừ
+ * kho ở bước 1 của Saga - 2 service không gọi hàm lẫn nhau, chỉ trao đổi qua message bất đồng bộ.
+ */
 @Service
 public class InventoryEventListener {
 

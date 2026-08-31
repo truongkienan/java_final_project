@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Map;
+
 @Controller
 @RequestMapping("/dashboard/orders")
 public class OrderController {
@@ -24,6 +26,29 @@ public class OrderController {
     public String manageOrders(Model model) {
         model.addAttribute("orders", orderApiService.getAllOrders());
         return "dashboard/orders";
+    }
+
+    // Xem chi tiết 1 đơn hàng - gồm cả thông tin thanh toán (lý do thất bại nếu có) lấy riêng
+    // từ payment-service, vì order-service không lưu dữ liệu này.
+    @GetMapping("/{id}")
+    public String viewOrder(@PathVariable("id") String id, Model model, RedirectAttributes redirectAttributes) {
+        Map<String, Object> order = orderApiService.getOrderById(id);
+        if (order == null) {
+            redirectAttributes.addFlashAttribute("orderError", "Order not found.");
+            return "redirect:/dashboard/orders";
+        }
+        model.addAttribute("order", order);
+        model.addAttribute("payment", paymentApiService.getPaymentByInvoiceId(id));
+        return "dashboard/order-detail";
+    }
+
+    // Admin xóa hẳn đơn hàng - xóa cứng khỏi order-service, không thể khôi phục.
+    @PostMapping("/{id}/delete")
+    public String deleteOrder(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+        boolean success = orderApiService.deleteOrder(id);
+        redirectAttributes.addFlashAttribute(success ? "orderMessage" : "orderError",
+                success ? "Order deleted." : "Unable to delete this order.");
+        return "redirect:/dashboard/orders";
     }
 
     // Admin huy don hang dang PENDING
@@ -40,6 +65,28 @@ public class OrderController {
     @PostMapping("/{id}/refund")
     public String refundOrder(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         boolean success = paymentApiService.refundPaypalOrder(id);
+
+        // payment-service publish "payment.success=REFUNDED" xong là trả HTTP 200 ngay - nhưng
+        // order-service cập nhật Invoice.status trên 1 thread RabbitMQ riêng, bất đồng bộ. Nếu
+        // redirect ngay, trang /dashboard/orders có thể render TRƯỚC khi DB kịp cập nhật, buộc
+        // admin phải F5 thủ công mới thấy REFUNDED. Poll tối đa 3s để tránh race condition này -
+        // cùng pattern đã dùng ở CheckoutController khi chờ Saga tồn kho xử lý xong.
+        if (success) {
+            long deadline = System.currentTimeMillis() + 3000;
+            while (System.currentTimeMillis() < deadline) {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+                Map<String, Object> latest = orderApiService.getOrderById(id);
+                if (latest != null && "REFUNDED".equals(latest.get("status"))) {
+                    break;
+                }
+            }
+        }
+
         redirectAttributes.addFlashAttribute(success ? "orderMessage" : "orderError",
                 success ? "Refunded." : "Unable to refund this order.");
         return "redirect:/dashboard/orders";

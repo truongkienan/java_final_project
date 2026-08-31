@@ -40,13 +40,12 @@ public class AuthController {
     @Value("${CUSTOMER_SERVICE_URL:http://localhost:8082/api/members}")
     private String customerServiceUrl;
 
-    // API Đăng nhập cho tài khoản Staff/Admin (bảng users)
+    // API Đăng nhập cho tài khoản Staff/Dashboard (bảng users)
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         Optional<User> userOpt = userRepository.findByUsername(request.getUsername());
 
         // Kiểm tra xem User có tồn tại và password có khớp không
-        // (Lưu ý: Ở dự án thực tế, password phải được mã hóa BCrypt, ở đây ta so sánh chuỗi thô để dễ test trước)
         if (userOpt.isPresent() && userOpt.get().getPassword().equals(request.getPassword())) {
             User user = userOpt.get();
 
@@ -110,7 +109,7 @@ public class AuthController {
         return ResponseEntity.ok("Đăng ký thành công!");
     }
 
-    // API Đổi mật khẩu (tài khoản Staff/Admin)
+    // API Đổi mật khẩu (tài khoản Staff/Dashboard)
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
         Optional<User> userOpt = userRepository.findByUsername(request.getUsername());

@@ -23,7 +23,7 @@ public class UserController {
     private RoleRepository roleRepository;
 
     @GetMapping
-    public List<UserSummaryDTO> getAllUsers() {
+    public List<UserSummaryDTO> getUsers() {
         return userRepository.findAll().stream()
                 .map(u -> new UserSummaryDTO(u.getId(), u.getUsername(), u.getRole().getRoleId(), u.getRole().getRoleName(), u.getActive()))
                 .collect(Collectors.toList());
@@ -38,7 +38,7 @@ public class UserController {
         return new UserSummaryDTO(user.getId(), user.getUsername(), role.getRoleId(), role.getRoleName(), user.getActive());
     }
 
-    // Bật/tắt tài khoản Staff - dùng cho tính năng "thu hồi/cấp lại" trên trang Admin Users
+    // Bật/tắt tài khoản Staff - dùng cho tính năng "thu hồi/cấp lại" trên trang Dashboard Users
     @PutMapping("/{id}/active")
     public UserSummaryDTO updateActive(@PathVariable("id") Long id, @RequestBody Map<String, Boolean> body) {
         User user = userRepository.findById(id).orElseThrow();

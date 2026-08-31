@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{dashboard/_layout}">
+
+<head>
+    <title>Order Detail - Admin</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <h1 class="mt-4">Order Detail</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/dashboard/orders}">Orders</a></li>
+            <li class="breadcrumb-item active">Detail</li>
+        </ol>
+
+        <div class="card mb-4">
+            <div class="card-header"><i class="fas fa-receipt mr-1"></i> Order Info</div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr>
+                        <th style="width:180px;">Order ID</th>
+                        <td th:text="${order.id}">abcd1234-...</td>
+                    </tr>
+                    <tr>
+                        <th>Customer</th>
+                        <td th:text="${order.memberId}">user123</td>
+                    </tr>
+                    <tr>
+                        <th>Order Date</th>
+                        <td th:text="${#strings.replace(#strings.substring(order.orderDate, 0, 19), 'T', ' ')}">2026-08-15 10:30:00</td>
+                    </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td>
+                            <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}"></span> <sup>VND</sup>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Status</th>
+                        <td>
+                            <span th:if="${order.status == 'PAID'}" class="badge badge-success" th:text="${order.status}">PAID</span>
+                            <span th:if="${order.status == 'PENDING'}" class="badge badge-warning" th:text="${order.status}">PENDING</span>
+                            <span th:if="${order.status == 'PENDING_INVENTORY'}" class="badge badge-warning" th:text="${order.status}">PENDING_INVENTORY</span>
+                            <span th:if="${order.status == 'CANCELLED'}" class="badge badge-danger" th:text="${order.status}">CANCELLED</span>
+                            <span th:if="${order.status == 'FAILED'}" class="badge badge-dark">PAYMENT FAILED</span>
+                            <span th:if="${order.status == 'OUT_OF_STOCK'}" class="badge badge-dark" th:text="${order.status}">OUT_OF_STOCK</span>
+                            <span th:if="${order.status == 'REFUND_REQUESTED'}" class="badge badge-info" th:text="${order.status}">REFUND_REQUESTED</span>
+                            <span th:if="${order.status == 'REFUNDED'}" class="badge badge-secondary" th:text="${order.status}">REFUNDED</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header"><i class="fas fa-box mr-1"></i> Items</div>
+            <div class="card-body">
+                <table class="table table-bordered mb-0">
+                    <thead>
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Product Name</th>
+                        <th>Unit Price</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${order.details}">
+                        <td th:text="${item.productId}">1</td>
+                        <td th:text="${item.productName} ?: '-'">Product name</td>
+                        <td><span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')}"></span> <sup>VND</sup></td>
+                        <td th:text="${item.quantity}">1</td>
+                        <td><span th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT')}"></span> <sup>VND</sup></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card mb-4" th:if="${payment != null}">
+            <div class="card-header"><i class="fab fa-paypal mr-1"></i> Payment Info</div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr>
+                        <th style="width:180px;">PayPal Order ID</th>
+                        <td th:text="${payment.paypalOrderId} ?: '-'">-</td>
+                    </tr>
+                    <tr>
+                        <th>Capture ID</th>
+                        <td th:text="${payment.captureId} ?: '-'">-</td>
+                    </tr>
+                    <tr>
+                        <th>Payment Status</th>
+                        <td th:text="${payment.status}">-</td>
+                    </tr>
+                    <tr th:if="${payment.failureReason != null}">
+                        <th>Failure Reason</th>
+                        <td>
+                            <div class="alert alert-danger mb-0" th:text="${payment.failureReason}"></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="alert alert-secondary" th:if="${payment == null}">
+            No payment attempt recorded for this order yet.
+        </div>
+
+        <a th:href="@{/dashboard/orders}" class="btn btn-secondary mb-4">Back to Orders</a>
+    </div>
+</div>
+</body>
+
+</html>

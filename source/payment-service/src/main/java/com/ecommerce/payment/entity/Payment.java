@@ -20,6 +20,10 @@ public class Payment {
     private String currency;
     private String status; // CREATED, COMPLETED, CANCELLED, REFUNDED, FAILED
 
+    // Lý do capture thất bại lấy từ response lỗi thật của PayPal (VD "INSUFFICIENT_FUNDS: ...") -
+    // null nếu status khác FAILED, hoặc nếu PayPal không trả chi tiết lỗi.
+    private String failureReason;
+
     private Date createdAt = new Date();
     private Date updatedAt = new Date();
 }

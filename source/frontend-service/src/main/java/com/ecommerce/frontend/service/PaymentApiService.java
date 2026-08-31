@@ -1,15 +1,29 @@
 package com.ecommerce.frontend.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
 @Service
 public class PaymentApiService {
+
+    // Kết quả capture: success + lý do thất bại thật lấy từ payment-service (nếu có), để hiển thị
+    // cho khách thay vì thông báo chung chung "An error occurred during payment".
+    public static class CaptureResult {
+        public final boolean success;
+        public final String reason;
+
+        public CaptureResult(boolean success, String reason) {
+            this.success = success;
+            this.reason = reason;
+        }
+    }
 
     @Autowired
     private RestTemplate restTemplate;
@@ -41,8 +55,8 @@ public class PaymentApiService {
         }
     }
 
-    // Capture PayPal Order sau khi user approve → trả về true nếu COMPLETED
-    public boolean capturePaypalOrder(String paypalOrderId) {
+    // Capture PayPal Order sau khi user approve → trả về CaptureResult (success + lý do nếu thất bại)
+    public CaptureResult capturePaypalOrder(String paypalOrderId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -53,11 +67,25 @@ public class PaymentApiService {
                     HttpMethod.POST, request, Map.class);
 
             Map<String, Object> result = response.getBody();
-            return result != null && "COMPLETED".equals(result.get("status"));
+            boolean ok = result != null && "COMPLETED".equals(result.get("status"));
+            return new CaptureResult(ok, null);
+
+        } catch (RestClientResponseException e) {
+            // payment-service trả 400 kèm {"error":..., "reason":...} khi capture thất bại - đọc
+            // "reason" ra để hiển thị lý do thật (VD "INSUFFICIENT_FUNDS: ...") cho khách.
+            String reason = null;
+            try {
+                Map<String, Object> body = new ObjectMapper().readValue(e.getResponseBodyAsString(), Map.class);
+                Object r = body.get("reason");
+                reason = r != null ? r.toString() : null;
+            } catch (Exception parseEx) {
+                System.err.println("Không parse được response lỗi từ payment-service: " + parseEx.getMessage());
+            }
+            return new CaptureResult(false, reason);
 
         } catch (Exception e) {
             System.err.println("Lỗi capture PayPal order: " + e.getMessage());
-            return false;
+            return new CaptureResult(false, null);
         }
     }
 
@@ -77,6 +105,16 @@ public class PaymentApiService {
         } catch (Exception e) {
             System.err.println("Lỗi hủy PayPal order: " + e.getMessage());
             return false;
+        }
+    }
+
+    // Lấy thông tin thanh toán (bao gồm lý do thất bại nếu có) theo invoiceId - dùng cho trang
+    // chi tiết đơn hàng. Trả về null nếu chưa từng có payment nào (VD đơn OUT_OF_STOCK) hoặc lỗi.
+    public Map<String, Object> getPaymentByInvoiceId(String invoiceId) {
+        try {
+            return restTemplate.getForObject(paymentServiceUrl + "/invoice/" + invoiceId, Map.class);
+        } catch (Exception e) {
+            return null;
         }
     }
 

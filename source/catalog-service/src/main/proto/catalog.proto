@@ -19,4 +19,5 @@ message ProductResponse {
   string productId = 1;
   double price = 2;
   bool exists = 3;
+  string productName = 4;
 }

@@ -56,6 +56,7 @@ public class OrderController {
 
                 // 4. Lấy giá chuẩn từ Server (Đề phòng hacker sửa giá trị trên Postman)
                 detail.setPrice(response.getPrice());
+                detail.setProductName(response.getProductName());
 
                 // Cộng dồn vào tổng tiền
                 totalAmount += response.getPrice() * detail.getQuantity();
@@ -89,7 +90,7 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllOrders() {
+    public ResponseEntity<?> getOrders() {
         return ResponseEntity.ok(invoiceRepository.findAllByOrderByOrderDateDesc());
     }
 
@@ -156,5 +157,17 @@ public class OrderController {
         invoice.setStatus("PAID");
         invoiceRepository.save(invoice);
         return ResponseEntity.ok(invoice);
+    }
+
+    // Admin xóa hẳn đơn hàng khỏi hệ thống - xóa cứng (không khôi phục được), cascade xóa luôn
+    // các dòng invoice_details liên quan nhờ CascadeType.ALL khai báo trên Invoice.details.
+    // Không xóa gì bên payment-service (lịch sử thanh toán vẫn giữ nguyên, thuộc domain riêng).
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteOrder(@PathVariable("id") UUID id) {
+        if (!invoiceRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        invoiceRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

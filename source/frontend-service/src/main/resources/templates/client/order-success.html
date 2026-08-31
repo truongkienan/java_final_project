@@ -23,15 +23,18 @@
             <a th:href="@{/}" class="forg-right" style="display:inline-block; margin-top:20px;">Continue Shopping</a>
         </div>
     </div>
+
+    <script>
+        // Chỉ xóa giỏ hàng phía client (localStorage) tại đây - trang này chỉ render sau khi
+        // CheckoutController.paymentSuccess() đã xác nhận PayPal capture COMPLETED thật sự.
+        // PHẢI nằm trong layout:fragment="content" - _layout.html chỉ merge nội dung khớp với
+        // fragment "content" vào trang cuối cùng, thẻ nào nằm ngoài (kể cả <script>) sẽ bị bỏ qua.
+        $(function () {
+            localStorage.products = "[]";
+            $(".my-cart-badge").text("0");
+        });
+    </script>
 </div>
-<script>
-    // Chỉ xóa giỏ hàng phía client (localStorage) tại đây - trang này chỉ render sau khi
-    // CheckoutController.paymentSuccess() đã xác nhận PayPal capture COMPLETED thật sự.
-    $(function () {
-        localStorage.products = "[]";
-        $(".my-cart-badge").text("0");
-    });
-</script>
 </body>
 
 </html>

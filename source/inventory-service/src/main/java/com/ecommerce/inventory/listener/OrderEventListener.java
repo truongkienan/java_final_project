@@ -8,6 +8,19 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * SUBSCRIBER (bên nhận) - Bước 2 của Saga đặt hàng.
+ *
+ * @RabbitListener(queues = QUEUE_ORDER_CREATED) khiến Spring tự canh Queue này bằng 1 luồng nền
+ * và tự gọi handleOrderCreated mỗi khi có message tới - message đó do order-service publish
+ * (routing key "order.created") ngay sau khi tạo Invoice, order-service publish xong là coi như
+ * xong việc, không hề gọi trực tiếp hàm nào ở đây và cũng không chờ kết quả trừ kho ngay lập tức.
+ *
+ * Sau khi trừ kho xong (thành công hay thất bại), inventory-service lại ĐÓNG VAI PUBLISHER, gửi
+ * tiếp message "inventory.result" ngược về cho order-service (xem InventoryEventPublisher) - đây
+ * là ví dụ rõ nhất cho việc 1 service có thể vừa là Subscriber (nhận order.created) vừa là
+ * Publisher (gửi inventory.result) trong cùng 1 luồng xử lý.
+ */
 @Component
 public class OrderEventListener {
 

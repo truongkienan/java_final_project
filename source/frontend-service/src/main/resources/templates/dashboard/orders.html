@@ -40,14 +40,16 @@
                         <tr th:each="order : ${orders}">
                             <td th:text="${#strings.substring(order.id, 0, 8)}">abcd1234</td>
                             <td th:text="${order.memberId}">user123</td>
-                            <td th:text="${#strings.substring(order.orderDate, 0, 10)}">2026-08-15</td>
+                            <td th:text="${#strings.replace(#strings.substring(order.orderDate, 0, 19), 'T', ' ')}">2026-08-15 10:30:00</td>
                             <td th:text="${order.details.size()}">1</td>
                             <td><span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}"></span> <sup>VND</sup></td>
                             <td>
                                 <span th:if="${order.status == 'PAID'}" class="badge badge-success" th:text="${order.status}">PAID</span>
                                 <span th:if="${order.status == 'PENDING'}" class="badge badge-warning" th:text="${order.status}">PENDING</span>
+                                <span th:if="${order.status == 'PENDING_INVENTORY'}" class="badge badge-warning" th:text="${order.status}">PENDING_INVENTORY</span>
                                 <span th:if="${order.status == 'CANCELLED'}" class="badge badge-danger" th:text="${order.status}">CANCELLED</span>
-                                <span th:if="${order.status == 'FAILED'}" class="badge badge-dark" th:text="${order.status}">FAILED</span>
+                                <span th:if="${order.status == 'FAILED'}" class="badge badge-dark">PAYMENT FAILED</span>
+                                <span th:if="${order.status == 'OUT_OF_STOCK'}" class="badge badge-dark" th:text="${order.status}">OUT_OF_STOCK</span>
                                 <span th:if="${order.status == 'REFUND_REQUESTED'}" class="badge badge-info" th:text="${order.status}">REFUND_REQUESTED</span>
                                 <span th:if="${order.status == 'REFUNDED'}" class="badge badge-secondary" th:text="${order.status}">REFUNDED</span>
                             </td>
@@ -66,6 +68,11 @@
                                         <button type="submit" class="btn btn-sm btn-secondary" onclick="return confirm('Reject this refund request?')">Reject</button>
                                     </form>
                                 </span>
+                                <a th:href="@{/dashboard/orders/{id}(id=${order.id})}" class="btn btn-sm btn-info">View</a>
+                                <form th:action="@{/dashboard/orders/{id}/delete(id=${order.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('Delete this order permanently? This cannot be undone.')">Delete</button>
+                                </form>
                             </td>
                         </tr>
                         </tbody>
@@ -75,6 +82,20 @@
         </div>
     </div>
 </div>
+<th:block layout:fragment="scripts">
+    <!-- th:inline="none" bắt buộc phải có: Thymeleaf tự quét MỌI text node (kể cả trong comment
+         HTML như dòng này) để tìm cú pháp inline expression của riêng nó - hai dấu ngoặc vuông
+         mở liền nhau rồi hai dấu ngoặc vuông đóng liền nhau. Mảng lồng nhau trong JS bên dưới vô
+         tình khớp đúng cú pháp đó, khiến Thymeleaf cố hiểu nó như 1 biểu thức và crash lúc parse.
+         th:inline="none" tắt việc quét đó cho riêng khối script bên dưới. -->
+    <script th:inline="none">
+        // Cột 2 = "Order Date". datatables-demo.js đọc biến này TRƯỚC khi DataTable khởi tạo
+        // (fragment "scripts" nằm trước lúc $(document).ready thật sự chạy) - nếu không set,
+        // DataTables mặc định tự sort theo cột đầu tiên (Order ID) tăng dần, đè lên thứ tự
+        // "mới nhất trước" mà order-service đã trả về đúng sẵn.
+        window.__dataTableOrder = [[2, 'desc']];
+    </script>
+</th:block>
 </body>
 
 </html>

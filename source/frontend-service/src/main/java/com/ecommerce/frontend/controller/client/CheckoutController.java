@@ -108,9 +108,9 @@ public class CheckoutController {
     @GetMapping("/success")
     public String paymentSuccess(@RequestParam("token") String paypalOrderId,
                                  HttpSession session, Model model) {
-        boolean success = paymentApiService.capturePaypalOrder(paypalOrderId);
+        PaymentApiService.CaptureResult result = paymentApiService.capturePaypalOrder(paypalOrderId);
 
-        if (success) {
+        if (result.success) {
             String username = (String) session.getAttribute("username");
             if (username != null) {
                 basketApiService.deleteBasket(username);
@@ -119,7 +119,12 @@ public class CheckoutController {
             return "client/order-success";
         }
 
-        model.addAttribute("message", "An error occurred during payment. Please try again.");
+        // Hiển thị lý do thật lấy từ PayPal (VD "INSUFFICIENT_FUNDS: ...") nếu có, thay vì luôn
+        // luôn hiện thông báo chung chung - dễ debug hơn khi test các kịch bản thanh toán thất bại.
+        String message = (result.reason != null && !result.reason.isBlank())
+                ? "Payment failed: " + result.reason
+                : "An error occurred during payment. Please try again.";
+        model.addAttribute("message", message);
         return "client/order-cancel";
     }
 

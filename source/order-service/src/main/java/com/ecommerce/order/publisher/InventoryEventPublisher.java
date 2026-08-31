@@ -10,6 +10,20 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * PUBLISHER (bên gửi).
+ *
+ * Cơ chế giao tiếp: gọi rabbitTemplate.convertAndSend(exchange, routingKey, object) rồi KẾT THÚC
+ * NGAY - không chờ, không biết bên nhận xử lý ra sao, thậm chí không biết có ai đang nghe hay
+ * không. Đây là giao tiếp BẤT ĐỒNG BỘ (asynchronous), khác hẳn gọi REST API (nơi caller luôn phải
+ * chờ response). Việc định tuyến message này tới đúng Queue của service nào là do RabbitMQ quyết
+ * định dựa trên các Binding đã khai báo (xem RabbitMQConfig của từng service) - InventoryEventPublisher
+ * hoàn toàn không biết, và không cần biết, inventory-service có đang chạy hay không.
+ *
+ * Nhờ vậy order-service và inventory-service KHÔNG PHỤ THUỘC trực tiếp vào nhau (loose coupling):
+ * nếu inventory-service đang restart, message vẫn nằm chờ an toàn trong Queue (vì Queue durable),
+ * order-service không hề bị lỗi hay phải chờ.
+ */
 @Service
 public class InventoryEventPublisher {
 

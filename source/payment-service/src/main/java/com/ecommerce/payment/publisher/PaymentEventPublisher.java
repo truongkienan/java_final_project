@@ -6,6 +6,14 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * PUBLISHER (bên gửi) - Bước 4 của Saga đặt hàng.
+ *
+ * payment-service là service DUY NHẤT không có Listener nào cả (xem payment-service/RabbitMQConfig)
+ * - nó chỉ đóng vai Publisher, không bao giờ đóng vai Subscriber. Sau khi xử lý thanh toán xong
+ * (thành công hay thất bại), nó publish message "payment.success" rồi kết thúc, không quan tâm
+ * order-service xử lý message đó ra sao hay khi nào - toàn bộ liên lạc là 1 chiều, bất đồng bộ.
+ */
 @Service
 public class PaymentEventPublisher {
 
