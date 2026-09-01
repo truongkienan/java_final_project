@@ -48,8 +48,9 @@
                         <td th:text="${#strings.substring(order.orderDate, 0, 10)}"></td>
                         <td th:text="${order.details.size()}"></td>
                         <td><sup>VND</sup> <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}"></span></td>
-                        <td th:text="${order.status}"></td>
+                        <td th:text="${order.status == 'FAILED'} ? 'PAYMENT FAILED' : ${order.status}"></td>
                         <td>
+                            <a th:href="@{/account/orders/{id}(id=${order.id})}" class="btn btn-sm btn-info">View</a>
                             <form th:if="${order.status == 'PENDING'}" th:action="@{/account/orders/{id}/cancel(id=${order.id})}" method="post" style="display:inline;">
                                 <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Cancel this order?')">Cancel Order</button>
                             </form>
@@ -61,6 +62,20 @@
                     </tr>
                     </tbody>
                 </table>
+
+                <nav th:if="${totalPages > 1}" aria-label="Order history pages">
+                    <ul class="pagination" style="margin-top:10px;">
+                        <li th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a th:href="@{/account(page=${currentPage - 1})}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+                        </li>
+                        <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+                            <a th:href="@{/account(page=${i})}" th:text="${i + 1}"></a>
+                        </li>
+                        <li th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                            <a th:href="@{/account(page=${currentPage + 1})}" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+                        </li>
+                    </ul>
+                </nav>
 
                 <h4 style="margin-top:30px;">Shipping Addresses</h4>
 

@@ -57,6 +57,25 @@ public class PaymentEventListener {
             Optional<Invoice> invoiceOpt = invoiceRepository.findById(orderId);
             if (invoiceOpt.isPresent()) {
                 Invoice invoice = invoiceOpt.get();
+
+                // Guard chống xử lý trùng (idempotency check) - cùng lý do với InventoryEventListener:
+                // CheckoutController.paymentCancel() (GET /checkout/cancel) gọi lại payment-service
+                // MỖI LẦN trang được tải/refresh (không phải chỉ 1 lần duy nhất), nên message này có
+                // thể tới đây nhiều lần cho cùng 1 đơn. Không có guard, mỗi lần message tới lại publish
+                // lại inventory.restore -> kho bị cộng dồn nhiều lần cho cùng 1 đơn (bug thực tế đã gặp:
+                // F5 trang Order Cancelled 10 lần -> hoàn kho 10 lần).
+                // Điều kiện hợp lệ khác nhau theo từng status:
+                // - REFUNDED: chỉ hợp lệ khi đơn đang PAID hoặc REFUND_REQUESTED (chờ Admin duyệt hoàn tiền).
+                // - PAID/FAILED/CANCELLED: chỉ hợp lệ khi đơn đang PENDING (vừa tạo PayPal order, chưa
+                //   có kết quả) - nếu đơn đã rời khỏi PENDING từ trước (ví dụ đã là CANCELLED), bỏ qua.
+                boolean validTransition = "REFUNDED".equals(status)
+                        ? Set.of("PAID", "REFUND_REQUESTED").contains(invoice.getStatus())
+                        : "PENDING".equals(invoice.getStatus());
+                if (!validTransition) {
+                    System.out.println("--> Bỏ qua (đơn đã xử lý từ trước, trạng thái hiện tại: " + invoice.getStatus() + ")");
+                    return;
+                }
+
                 invoice.setStatus(status); // Cập nhật hóa đơn sang PAID
                 invoiceRepository.save(invoice);
                 System.out.println("--> Đã cập nhật DB thành công!");

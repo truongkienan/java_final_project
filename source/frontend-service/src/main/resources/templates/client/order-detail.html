@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{client/_layout}">
+
+<head>
+    <title>Order Detail - BigStore</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <!--banner-->
+    <div class="banner-top">
+        <div class="container">
+            <h3>Order Detail</h3>
+            <h4><a th:href="@{/}">Home</a><label>/</label><a th:href="@{/account}">My Account</a><label>/</label>Order Detail</h4>
+            <div class="clearfix"> </div>
+        </div>
+    </div>
+
+    <div class="login">
+        <div class="main-agileits" style="width:90%; max-width:900px;">
+            <div class="form-w3agile form-w3agile1">
+
+                <h4>Order Info</h4>
+                <table class="table" style="width:100%; color:#333; margin-top:10px;">
+                    <tr>
+                        <th style="width:180px;">Order ID</th>
+                        <td th:text="${order.id}"></td>
+                    </tr>
+                    <tr>
+                        <th>Order Date</th>
+                        <td th:text="${#strings.replace(#strings.substring(order.orderDate, 0, 19), 'T', ' ')}"></td>
+                    </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td><span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}"></span> <sup>VND</sup></td>
+                    </tr>
+                    <tr>
+                        <th>Status</th>
+                        <td th:text="${order.status == 'FAILED'} ? 'PAYMENT FAILED' : ${order.status}"></td>
+                    </tr>
+                </table>
+
+                <h4 style="margin-top:30px;">Items</h4>
+                <table class="table" style="width:100%; color:#333; margin-top:10px;">
+                    <thead>
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Product Name</th>
+                        <th>Unit Price</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${order.details}">
+                        <td th:text="${item.productId}"></td>
+                        <td th:text="${item.productName} ?: '-'"></td>
+                        <td><span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')}"></span> <sup>VND</sup></td>
+                        <td th:text="${item.quantity}"></td>
+                        <td><span th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT')}"></span> <sup>VND</sup></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div th:if="${payment != null}">
+                    <h4 style="margin-top:30px;">Payment Info</h4>
+                    <table class="table" style="width:100%; color:#333; margin-top:10px;">
+                        <tr>
+                            <th style="width:180px;">Payment Status</th>
+                            <td th:text="${payment.status}"></td>
+                        </tr>
+                        <tr th:if="${payment.failureReason != null}">
+                            <th>Failure Reason</th>
+                            <td>
+                                <div class="alert alert-danger" style="color:#a94442;" th:text="${payment.failureReason}"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="margin-top:30px;">
+                    <form th:if="${order.status == 'PENDING'}" th:action="@{/account/orders/{id}/cancel(id=${order.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Cancel this order?')">Cancel Order</button>
+                    </form>
+                    <form th:if="${order.status == 'PAID'}" th:action="@{/account/orders/{id}/request-refund(id=${order.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Request a refund for this order?')">Request Refund</button>
+                    </form>
+                    <span th:if="${order.status == 'REFUND_REQUESTED'}" style="font-style:italic; color:#888;">Refund pending approval</span>
+                    <a th:href="@{/account}" class="btn btn-sm btn-secondary" style="margin-left:8px;">Back to My Account</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>
