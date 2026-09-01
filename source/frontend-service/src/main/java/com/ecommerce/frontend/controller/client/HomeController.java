@@ -1,5 +1,6 @@
 package com.ecommerce.frontend.controller.client;
 
+import com.ecommerce.frontend.dto.CategoryDTO;
 import com.ecommerce.frontend.dto.ProductDTO;
 import com.ecommerce.frontend.service.CatalogApiService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,5 +53,33 @@ public class HomeController {
         model.addAttribute("relatedProducts", related);
 
         return "client/single";
+    }
+
+    // Danh sách sản phẩm theo danh mục (menu <ul class="nav navbar-nav"> ở _header.html).
+    // - Danh mục con (parentId khác NULL): chỉ lấy đúng sản phẩm có category_id = id đang bấm.
+    // - Danh mục gốc (parentId = NULL): gom sản phẩm của mọi danh mục con thuộc gốc này
+    //   (product.category.parentId = id đang bấm).
+    @GetMapping("/category/{id}")
+    public String categoryProducts(@PathVariable("id") Short id, Model model) {
+        CategoryDTO category = catalogApiService.getCategoryById(id);
+        if (category == null) {
+            return "redirect:/";
+        }
+
+        List<ProductDTO> allProducts = catalogApiService.getProducts();
+        List<ProductDTO> productsInCategory;
+        if (category.getParentId() != null) {
+            productsInCategory = allProducts.stream()
+                    .filter(p -> p.getCategory() != null && id.equals(p.getCategory().getCategoryId()))
+                    .toList();
+        } else {
+            productsInCategory = allProducts.stream()
+                    .filter(p -> p.getCategory() != null && id.equals(p.getCategory().getParentId()))
+                    .toList();
+        }
+
+        model.addAttribute("category", category);
+        model.addAttribute("products", productsInCategory);
+        return "client/category";
     }
 }

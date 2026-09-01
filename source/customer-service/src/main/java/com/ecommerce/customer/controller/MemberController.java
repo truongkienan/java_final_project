@@ -19,7 +19,7 @@ public class MemberController {
     private MemberRepository memberRepository;
 
     @GetMapping
-    public List<Member> getAllMembers() {
+    public List<Member> getMembers() {
         return memberRepository.findAll();
     }
 

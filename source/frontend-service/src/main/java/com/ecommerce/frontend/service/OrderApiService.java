@@ -52,7 +52,7 @@ public class OrderApiService {
         }
     }
 
-    public java.util.List<com.ecommerce.frontend.dto.OrderDTO> getAllOrders() {
+    public java.util.List<com.ecommerce.frontend.dto.OrderDTO> getOrders() {
         try {
             com.ecommerce.frontend.dto.OrderDTO[] orders = restTemplate.getForObject(
                     orderServiceUrl, com.ecommerce.frontend.dto.OrderDTO[].class);

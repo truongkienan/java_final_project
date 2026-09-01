@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{client/_layout}">
+
+<head>
+	<title th:text="${category.categoryName} + ' - BigStore'">Category - BigStore</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+	<div class="product">
+		<div class="container">
+			<div class="spec ">
+				<h3 th:text="${category.categoryName}">Category</h3>
+				<div class="ser-t">
+					<b></b>
+					<span><i></i></span>
+					<b class="line"></b>
+				</div>
+			</div>
+			<div class=" con-w3l" th:if="${not #lists.isEmpty(products)}">
+				<div class="col-md-3 pro-1" th:each="product : ${products}">
+					<div class="col-m">
+						<a th:href="@{/product/{id}(id=${product.productId})}" class="offer-img">
+							<img th:src="@{/client/images/{img}(img=${product.imageUrl})}" class="img-responsive"
+							     alt="">
+						</a>
+						<div class="mid-1">
+							<div class="women">
+								<h6><a th:href="@{/product/{id}(id=${product.productId})}" th:text="${product.productName}">Product</a>
+									<span th:if="${product.unit != null}" th:text="'(' + ${product.unit.unitName} + ')'"></span>
+								</h6>
+							</div>
+							<div class="mid-2">
+								<p th:if="${product.saleOfPrice != null and product.saleOfPrice.compareTo(product.unitPrice) != 0}"><label><sup>VND</sup> <span th:text="${#numbers.formatDecimal(product.unitPrice, 0, 'COMMA', 0, 'POINT')}"></span></label><em class="item_price"><sup>VND</sup> <span th:text="${#numbers.formatDecimal(product.saleOfPrice, 0, 'COMMA', 0, 'POINT')}"></span></em></p>
+								<p th:unless="${product.saleOfPrice != null and product.saleOfPrice.compareTo(product.unitPrice) != 0}"><em class="item_price"><sup>VND</sup> <span th:text="${#numbers.formatDecimal(product.unitPrice, 0, 'COMMA', 0, 'POINT')}"></span></em></p>
+								<div class="block">
+									<div class="starbox small ghosting"> </div>
+								</div>
+								<div class="clearfix"></div>
+							</div>
+							<div class="add add-2">
+								<button class="btn btn-danger my-cart-btn my-cart-b" data-quantity="1"
+								        th:attr="data-id=${product.productId}, data-name=${product.productName}, data-price=${product.saleOfPrice != null and product.saleOfPrice.compareTo(product.unitPrice) != 0 ? product.saleOfPrice : product.unitPrice}, data-image=@{/client/images/{img}(img=${product.imageUrl})}">
+									Add to Cart
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="clearfix"></div>
+			</div>
+			<p th:if="${#lists.isEmpty(products)}">Hiện chưa có sản phẩm nào trong danh mục này.</p>
+		</div>
+	</div>
+</div>
+</body>
+
+</html>

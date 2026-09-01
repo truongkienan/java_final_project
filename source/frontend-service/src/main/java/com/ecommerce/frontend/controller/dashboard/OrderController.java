@@ -24,7 +24,7 @@ public class OrderController {
 
     @GetMapping
     public String manageOrders(Model model) {
-        model.addAttribute("orders", orderApiService.getAllOrders());
+        model.addAttribute("orders", orderApiService.getOrders());
         return "dashboard/orders";
     }
 

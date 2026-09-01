@@ -32,19 +32,46 @@ public class InventoryEventListener {
 
         System.out.println("--> [Order Service] Nhận kết quả trừ kho cho Order: " + orderIdStr + " - " + status);
 
+        // Lỗi DỮ LIỆU (message sai định dạng, không phải lỗi hạ tầng): retry cũng vô ích vì lần
+        // sau parse lại vẫn sai y hệt (poison message) - bắt riêng, log rồi bỏ qua, KHÔNG throw
+        // ra ngoài để tránh Spring nack + RabbitMQ redeliver lặp vô hạn cho 1 message không bao
+        // giờ xử lý được.
+        UUID orderId;
         try {
-            UUID orderId = UUID.fromString(orderIdStr);
-            Optional<Invoice> invoiceOpt = invoiceRepository.findById(orderId);
-            if (invoiceOpt.isPresent()) {
-                Invoice invoice = invoiceOpt.get();
-                if (!"PENDING_INVENTORY".equals(invoice.getStatus())) {
-                    return; // Đơn không còn ở trạng thái chờ (đã xử lý/message bị gửi lặp) - bỏ qua
-                }
-                invoice.setStatus("RESERVED".equals(status) ? "PENDING" : "OUT_OF_STOCK");
-                invoiceRepository.save(invoice);
-            }
-        } catch (Exception e) {
-            System.err.println("Lỗi xử lý kết quả trừ kho: " + e.getMessage());
+            orderId = UUID.fromString(orderIdStr);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Message inventory.result có orderId không hợp lệ, bỏ qua: " + orderIdStr);
+            return;
         }
+
+        Optional<Invoice> invoiceOpt = invoiceRepository.findById(orderId);
+        if (invoiceOpt.isEmpty()) {
+            // Không tìm thấy Invoice - dữ liệu không đồng bộ (hiếm gặp), retry cũng không giải
+            // quyết được gì nên bỏ qua thay vì throw.
+            System.err.println("Không tìm thấy Invoice cho Order: " + orderIdStr);
+            return;
+        }
+
+        Invoice invoice = invoiceOpt.get();
+        // Guard chống xử lý trùng (idempotency check). RabbitMQ có thể gửi lại (redeliver)
+        // đúng message này nếu order-service chưa kịp gửi ACK trước đó (crash, restart,
+        // mất kết nối...). Nếu không có guard, 1 message inventory.result cũ/lặp có thể
+        // ghi đè sai trạng thái của đơn đã chuyển sang bước khác từ lúc đó - ví dụ: đơn đã
+        // bị Admin hủy và hoàn kho xong (CANCELLED), nhưng message RESERVED cũ đến muộn lại
+        // set nhầm về lại PENDING, khiến hệ thống tưởng đơn còn giữ hàng trong khi kho đã
+        // được hoàn trả từ trước - sai lệch dữ liệu nghiêm trọng. Vì vậy chỉ cập nhật khi
+        // đơn THỰC SỰ còn đang chờ kết quả trừ kho (PENDING_INVENTORY).
+        if (!"PENDING_INVENTORY".equals(invoice.getStatus())) {
+            return; // Đơn không còn ở trạng thái chờ (đã xử lý/message bị gửi lặp) - bỏ qua
+        }
+
+        invoice.setStatus("RESERVED".equals(status) ? "PENDING" : "OUT_OF_STOCK");
+
+        // Cố tình KHÔNG bọc try/catch quanh save(): đây là lỗi HẠ TẦNG (DB mất kết nối, timeout,
+        // deadlock...) - retry sau đó CÓ THỂ thành công khi DB hồi phục. Để exception thoát ra
+        // ngoài method, Spring sẽ tự NACK message này, RabbitMQ sẽ giữ lại và gửi lại (redeliver)
+        // sau - thay vì nuốt lỗi rồi vẫn ACK oan như code cũ, khiến Invoice kẹt vĩnh viễn ở
+        // PENDING_INVENTORY dù inventory-service đã trừ kho thành công thật sự.
+        invoiceRepository.save(invoice);
     }
 }

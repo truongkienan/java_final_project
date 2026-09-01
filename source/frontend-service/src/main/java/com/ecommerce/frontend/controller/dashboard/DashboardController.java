@@ -24,7 +24,7 @@ public class DashboardController {
     // API đã có sẵn (getAllOrders() đã sort sẵn desc theo ngày) - không cần thêm service/endpoint mới.
     @GetMapping
     public String index(Model model) {
-        List<OrderDTO> orders = orderApiService.getAllOrders();
+        List<OrderDTO> orders = orderApiService.getOrders();
 
         YearMonth currentMonth = YearMonth.now();
         List<String> monthLabels = new ArrayList<>();
