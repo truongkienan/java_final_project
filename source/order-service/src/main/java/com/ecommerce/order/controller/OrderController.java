@@ -8,6 +8,7 @@ import com.ecommerce.order.entity.Invoice;
 import com.ecommerce.order.entity.InvoiceDetail;
 import com.ecommerce.order.publisher.InventoryEventPublisher;
 import com.ecommerce.order.repository.InvoiceRepository;
+import com.ecommerce.order.service.OrderCancellationService;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,9 @@ public class OrderController {
 
     @Autowired
     private InventoryEventPublisher inventoryEventPublisher;
+
+    @Autowired
+    private OrderCancellationService orderCancellationService;
 
     // Tiêm (Inject) gRPC Client tự động kết nối tới cấu hình "catalog-service" trong properties
     @GrpcClient("catalog-service")
@@ -120,11 +124,8 @@ public class OrderController {
         if (!"PENDING".equals(invoice.getStatus())) {
             return ResponseEntity.badRequest().body("Chỉ có thể hủy đơn hàng đang ở trạng thái PENDING");
         }
-        invoice.setStatus("CANCELLED");
-        invoiceRepository.save(invoice);
-
         // Saga: đơn đang PENDING nghĩa là đã trừ kho thành công trước đó - hoàn lại kho
-        inventoryEventPublisher.publishInventoryRestore(invoice);
+        orderCancellationService.cancelPendingOrder(invoice);
 
         return ResponseEntity.ok(invoice);
     }
